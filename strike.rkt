@@ -14,7 +14,8 @@
          ground presence transform contain disclose recognize
          wf:hadamard wf:collapse wf:entangle wf:interfere
          wf:ring wf:teleport wf:nand
-         wf:factor wf:decompose wf:sum)
+         wf:factor wf:decompose wf:sum
+         ->str)
 
 
 ;;; -----------------------------------------------------------
