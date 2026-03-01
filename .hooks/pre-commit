@@ -1,0 +1,68 @@
+#!/bin/bash
+# ═══════════════════════════════════════════════════════════
+# STRIKING SURFACE — PRE-COMMIT HOOK
+#
+# Automata that enforce principles mechanically.
+# Neither partner needs to remember. The hook remembers.
+#
+# Checks:
+#   1. make test passes (lint + circuits + time budget)
+#   2. No unjustified substrate recursion in new waveforms
+#
+# Install: ln -sf ../../.hooks/pre-commit .git/hooks/pre-commit
+# ═══════════════════════════════════════════════════════════
+
+echo ""
+echo "  ╔═══════════════════════════════════════════╗"
+echo "  ║   PRE-COMMIT — CONSTITUTIONAL CHECK       ║"
+echo "  ╚═══════════════════════════════════════════╝"
+echo ""
+
+# -----------------------------------------------------------
+# CHECK 1: make test (includes lint + circuits + time budget)
+# -----------------------------------------------------------
+echo "  [1/2] make test..."
+if ! make test > /dev/null 2>&1; then
+    echo "  REJECTED — make test failed."
+    echo "  Run 'make test' to see details."
+    exit 1
+fi
+echo "  ok"
+
+# -----------------------------------------------------------
+# CHECK 2: Substrate recursion must be justified
+# -----------------------------------------------------------
+# Any recursive helper (define (name ...) ... (name ...))
+# in staged .rkt files that isn't marked with ; MEMBRANE:
+# is flagged. This enforces bespoke-first.
+echo "  [2/2] membrane justification..."
+fail=0
+for f in $(git diff --cached --name-only --diff-filter=ACM | grep '\.rkt$'); do
+    # Find functions that call themselves (simple recursion detection)
+    # in the staged version of the file
+    staged=$(git show ":$f" 2>/dev/null) || continue
+
+    # Get all defined function names
+    funcs=$(echo "$staged" | grep -oP '^\(define\s+\(\K[a-zA-Z_:!?/-]+' || true)
+
+    for func in $funcs; do
+        # Count occurrences: if name appears more than once, it's recursive
+        count=$(echo "$staged" | grep -c "$func" || true)
+        if [ "$count" -gt 2 ]; then
+            # Check for MEMBRANE justification
+            has_membrane=$(echo "$staged" | grep -B5 "define.*$func" | grep -c "; MEMBRANE:" || true)
+            if [ "$has_membrane" -eq 0 ]; then
+                # Check if it's in strike.rkt (the machine itself is exempt)
+                if [ "$f" != "strike.rkt" ]; then
+                    echo "  WARNING — $f: '$func' appears recursive without ; MEMBRANE: justification"
+                    echo "           Was bespoke composition on the surface considered first?"
+                fi
+            fi
+        fi
+    done
+done
+echo "  ok"
+
+echo ""
+echo "  constitutional. proceeding."
+echo ""

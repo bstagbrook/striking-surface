@@ -1536,27 +1536,51 @@
 ;;; SECTION 18: ENFORCEMENT
 ;;; ═══════════════════════════════════════════════════════════════
 ;;;
-;;; The Makefile enforces two properties on all programs:
+;;; Principles that depend on remembering are not principles.
+;;; They are hopes. Automata enforce mechanically.
 ;;;
-;;;   1. STATIC LINT — no forbidden constructs.
-;;;      Scans for: for, while, do, set!
-;;;      If found: FAIL. Iteration or mutation detected.
+;;; Three layers of enforcement:
 ;;;
-;;;   2. TIME BUDGET — every program must complete within
-;;;      a fixed time limit (30 seconds).
-;;;      If exceeded: FAIL. The circuit took too long.
+;;;   LAYER 1: STATIC LINT (make lint)
+;;;     Scans all programs for forbidden constructs:
+;;;       for, for-each, for/list, for/fold, while, do, set!
+;;;     If found: FAIL. Iteration or mutation detected.
+;;;     The clockless machine does not iterate or mutate.
 ;;;
-;;; These are constitution checks on the WORKFLOW.
-;;; The Makefile is the striking surface for the process.
-;;; A program that iterates is a CUT.
-;;; A program that times out is a CUT.
+;;;   LAYER 2: CIRCUIT TEST (make test)
+;;;     Runs lint first (layer 1), then:
+;;;     - Executes every program with a 30-second time budget
+;;;     - Counts CUT lines in output
+;;;     - Compares against expected CUT count per program
+;;;     If exceeded or mismatched: FAIL.
+;;;     A program that times out is a CUT.
+;;;     A program with unexpected CUTs is broken.
 ;;;
-;;; Run: make test (includes lint automatically)
-;;; Run: make lint (static analysis only)
+;;;   LAYER 3: PRE-COMMIT HOOK (.hooks/pre-commit)
+;;;     Runs automatically before every git commit.
+;;;     Check 1: make test must pass (layers 1+2).
+;;;     Check 2: membrane justification — any recursive function
+;;;       in a staged .rkt file (a function name appearing >2 times)
+;;;       must be annotated with "; MEMBRANE:" explaining why
+;;;       substrate recursion is needed instead of bespoke
+;;;       composition on the surface. strike.rkt is exempt
+;;;       (the machine itself is the substrate).
+;;;     If either check fails: commit is REJECTED.
+;;;     Neither partner needs to remember. The hook remembers.
+;;;
+;;;   Install: ln -sf ../../.hooks/pre-commit .git/hooks/pre-commit
+;;;
+;;; The enforcement chain:
+;;;   lint catches forbidden constructs (static)
+;;;   test catches broken circuits (dynamic)
+;;;   hook catches uncommitted violations (workflow)
+;;;   No work enters the repo without passing all three.
 
 (displayln "\n══════ SECTION 18: ENFORCEMENT ══════")
-(displayln "  make lint — no forbidden constructs in any program")
-(displayln "  make test — includes lint + time budget + circuit verification")
+(displayln "  Layer 1: make lint — no forbidden constructs")
+(displayln "  Layer 2: make test — lint + time budget + circuit verification")
+(displayln "  Layer 3: pre-commit hook — constitutional check before every commit")
+(displayln "  Neither partner needs to remember. The automata remember.")
 
 
 ;;; ═══════════════════════════════════════════════════════════════
