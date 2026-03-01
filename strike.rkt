@@ -12,10 +12,11 @@
 
 (provide surface
          ground presence transform contain disclose recognize
+         as pipe
          wf:hadamard wf:collapse wf:entangle wf:interfere
          wf:ring wf:teleport wf:nand
          wf:factor wf:decompose wf:sum
-         ->str)
+         ->str shape-value)
 
 
 ;;; -----------------------------------------------------------
@@ -256,6 +257,17 @@
 (define (recognize name)
   (list 'recognize name))
 
+;; As-gate — structural conditional. O(1).
+;; If the shape named match-name has value equal to match-value,
+;; resolve then-shape. Otherwise skip. No iteration. The shape
+;; gates itself by what it IS.
+(define (as name match-name match-value then-shape)
+  (list 'as name match-name (->str match-value) then-shape))
+
+;; Pipe — surface composition. Feed one surface's flowspace into another.
+(define (pipe from-flowspace . shapes)
+  (list* 'pipe from-flowspace shapes))
+
 
 ;;; -----------------------------------------------------------
 ;;; THE SURFACE — structural resolution
@@ -339,6 +351,27 @@
                                  (if found "recognized" "absent")
                                  ": (" (->str name) ")"))
        (values (list 'recognized name found) flowspace))]
+
+    ;; As-gate — structural conditional. O(1).
+    ;; Hash lookup + string compare + resolve or skip. No iteration.
+    [(list 'as name match-name match-value then-shape)
+     (let* ([existing (hash-ref flowspace match-name #f)]
+            [val (if existing (shape-value existing) #f)]
+            [open? (and val (equal? val (->str match-value)))])
+       (if open?
+           (let ()
+             (displayln (string-append "  as " (->str name) ": gate open"))
+             (resolve-shape then-shape flowspace))
+           (let ()
+             (displayln (string-append "  as " (->str name) ": gate closed"))
+             (values (list 'gated name #f) flowspace))))]
+
+    ;; Pipe — surface composition. Merge incoming flowspace, then resolve children.
+    [(list* 'pipe from-flowspace children)
+     (let ([merged (foldl (λ (k fs) (hash-set fs k (hash-ref from-flowspace k)))
+                          flowspace
+                          (hash-keys from-flowspace))])
+       (resolve-shapes children merged))]
 
     ;; Anything else — pass through
     [other (values other flowspace)]))
