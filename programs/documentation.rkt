@@ -1381,3 +1381,70 @@
   ;; flowspace: 0 shapes on the surface
   ;; The empty circuit is valid.
   ;; The breadboard before any components.
+
+
+;;; ═══════════════════════════════════════════════════════════════
+;;; SECTION 15: GOVERNANCE — THE MODEL APPLIED TO WORKFLOW
+;;; ═══════════════════════════════════════════════════════════════
+;;;
+;;; Governance is not a rule imposed on the model. It IS the model.
+;;; Before any work begins, three phases:
+;;;
+;;;   PHASE 1: TRANSFORM
+;;;     Co-define intention (source) and outcome (target).
+;;;     What are we doing, why, and what does done look like?
+;;;     Intention and outcome are co-discovered — you don't fully
+;;;     know the intention until you articulate the outcome, and
+;;;     the outcome sharpens as the intention clarifies. They are
+;;;     source and target, defined together like two ends of the
+;;;     same wire. Outcome must account for updated documentation
+;;;     and working demonstrations.
+;;;
+;;;   PHASE 2: PLAN
+;;;     From the outcome backwards, decompose into a topologically
+;;;     sorted list of steps. Each step has a boolean indicator:
+;;;     done or not done. The plan IS the residue chain traced
+;;;     from target back to source.
+;;;
+;;;   PHASE 3: ALIGNMENT
+;;;     Both intelligence partners confirm the plan is
+;;;     constitutional: chain, grounded, complete, balanced,
+;;;     minimal. Then strike.
+;;;
+;;; Discussion can happen to establish the transform. No other
+;;; work begins until alignment, unless a relevant exception is
+;;; explicitly made.
+;;;
+;;; A transform has three containments: source, target, waveform.
+;;; Governance has three phases: transform, plan, alignment.
+;;; Same shape. Same circuit. Same strike.
+
+(displayln "\n══════ SECTION 15: GOVERNANCE ══════")
+
+;; Phase 1: TRANSFORM — co-define intention and outcome.
+;;   Intention: understand the structure of 360.
+;;   Outcome: a chain of prime factors from 360 to ground.
+;;   (These emerge together — you can't state one without the other.)
+
+;; Phase 2: PLAN — from outcome backwards, with indicators.
+;;   Step 3: residue is constitutional? [done/not done]
+;;   Step 2: wf:factor decomposes 360? [done/not done]
+;;   Step 1: place 360 on the surface? [done/not done]
+
+;; Phase 3: ALIGNMENT — both partners confirm. Strike.
+
+(surface
+  (transform 'governed-task
+    (presence 'intention 360)    ; source: the intention
+    (ground)                      ; target: the outcome (ground = done)
+    wf:factor)                    ; plan: the waveform that gets us there
+  (disclose 'governed-task))
+  ;; The residue IS the plan, executed.
+  ;; 360 -> 2, 2 -> 3, 3 -> 5, ... chain to ground.
+  ;; All indicators: done. Constitutional. Complete.
+
+;; The empty governed task: no transform, no plan, no alignment.
+;; Still valid. The machine before any work begins.
+(surface)
+  ;; Governance with nothing to govern = the empty surface.
+  ;; Valid. Ready. Waiting for the transform to be defined.
