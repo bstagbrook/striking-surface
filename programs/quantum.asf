@@ -1,0 +1,12 @@
+# Map the quantum repo as shapes on a surface.
+# Intention: see the structure. Not demonstrate the machinery.
+
+presence ground e
+presence repo .
+
+# What's in this repo?
+transform map_repo repo ground
+wire map_repo python3 waveforms/tree.py
+strike map_repo
+
+disclose map_repo

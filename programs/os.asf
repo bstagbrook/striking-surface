@@ -1,0 +1,49 @@
+# The ASF Operating System
+# Shapes on a surface. Not documentation.
+
+# === PLACE SHAPES ===
+
+presence ground e
+presence sixty 60
+presence twelve 12
+presence hello hello
+presence ninetyseven 97
+
+# === DECLARE TRANSFORMATIONS ===
+# Each one: source, target, hollow.
+# The hollow fills when struck.
+
+transform factor60 sixty ground
+transform factor12 twelve ground
+transform greet hello e
+transform prime97 ninetyseven ground
+
+# === WIRE WAVEFORMS ===
+# Each waveform is an engulfed process.
+# The striking surface calls it. Residue comes back.
+
+wire factor60 python3 waveforms/factor.py
+wire factor12 python3 waveforms/factor.py
+wire greet python3 waveforms/decompose.py
+wire prime97 python3 waveforms/factor.py
+
+# === STRIKE ===
+# Current flows. Residue is deposited.
+
+strike factor60
+strike factor12
+strike greet
+strike prime97
+
+# === DISCLOSE ===
+# Show what's on the surface.
+
+disclose factor60
+disclose factor12
+disclose greet
+disclose prime97
+
+# === RECOGNIZE ===
+
+recognize factor60
+recognize missing

@@ -1,0 +1,163 @@
+# Logic gates from NAND.
+# NAND is the only waveform. Everything else is a shape.
+
+presence ground e
+
+# === NAND: the universal gate ===
+# NAND(1,1) = 0. NAND(anything else) = 1.
+# This is the only thing that touches the substrate.
+
+# --- Truth table for NAND ---
+
+presence both_true 1,1
+presence one_true 1,0
+presence other_true 0,1
+presence both_false 0,0
+
+transform nand_11 both_true ground
+transform nand_10 one_true ground
+transform nand_01 other_true ground
+transform nand_00 both_false ground
+
+wire nand_11 python3 waveforms/nand.py
+wire nand_10 python3 waveforms/nand.py
+wire nand_01 python3 waveforms/nand.py
+wire nand_00 python3 waveforms/nand.py
+
+strike nand_11
+strike nand_10
+strike nand_01
+strike nand_00
+
+disclose nand_11
+disclose nand_10
+disclose nand_01
+disclose nand_00
+
+# NAND(1,1)=0, NAND(1,0)=1, NAND(0,1)=1, NAND(0,0)=1.
+
+# === NOT: NAND(A,A) ===
+# NOT is a label for a specific use of NAND: feed both inputs the same value.
+
+presence one 1
+presence zero 0
+
+presence one_one 1,1
+presence zero_zero 0,0
+
+transform not_1 one_one ground
+transform not_0 zero_zero ground
+
+wire not_1 python3 waveforms/nand.py
+wire not_0 python3 waveforms/nand.py
+
+strike not_1
+strike not_0
+
+disclose not_1
+disclose not_0
+
+# NOT(1)=0, NOT(0)=1. Built from NAND. No new waveform.
+
+# === AND: NAND then NOT ===
+# AND(A,B) = NOT(NAND(A,B))
+# First NAND, then feed the result to itself as NAND(result,result).
+
+# AND(1,1): NAND(1,1)=0, then NOT(0)=NAND(0,0)=1
+# We already struck nand_11 and got 0. Now NAND(0,0):
+
+presence and_11_mid 0,0
+transform and_11 and_11_mid ground
+wire and_11 python3 waveforms/nand.py
+strike and_11
+disclose and_11
+
+# AND(1,0): NAND(1,0)=1, then NAND(1,1)=0
+presence and_10_mid 1,1
+transform and_10 and_10_mid ground
+wire and_10 python3 waveforms/nand.py
+strike and_10
+disclose and_10
+
+# AND(1,1)=1, AND(1,0)=0. Built from NAND. No new waveform.
+
+# === OR: NAND(NOT(A), NOT(B)) ===
+# OR(1,0): NOT(1)=0, NOT(0)=1, NAND(0,1)=1
+
+presence or_10_mid 0,1
+transform or_10 or_10_mid ground
+wire or_10 python3 waveforms/nand.py
+strike or_10
+disclose or_10
+
+# OR(0,0): NOT(0)=1, NOT(0)=1, NAND(1,1)=0
+presence or_00_mid 1,1
+transform or_00 or_00_mid ground
+wire or_00 python3 waveforms/nand.py
+strike or_00
+disclose or_00
+
+# OR(1,0)=1, OR(0,0)=0. Built from NAND. No new waveform.
+
+# === XOR: NAND(NAND(A, NAND(A,B)), NAND(B, NAND(A,B))) ===
+# XOR(1,0):
+#   NAND(1,0)=1
+#   NAND(1,1)=0   (that's NAND(A, NAND(A,B)))
+#   NAND(0,1)=1   (that's NAND(B, NAND(A,B)))
+#   NAND(0,1)=1   (final)
+
+presence xor_10_step1 1,0
+transform xor_10_s1 xor_10_step1 ground
+wire xor_10_s1 python3 waveforms/nand.py
+strike xor_10_s1
+
+# NAND(A=1, result=1) = NAND(1,1) = 0
+presence xor_10_step2 1,1
+transform xor_10_s2 xor_10_step2 ground
+wire xor_10_s2 python3 waveforms/nand.py
+strike xor_10_s2
+
+# NAND(B=0, result=1) = NAND(0,1) = 1
+presence xor_10_step3 0,1
+transform xor_10_s3 xor_10_step3 ground
+wire xor_10_s3 python3 waveforms/nand.py
+strike xor_10_s3
+
+# NAND(0, 1) = 1
+presence xor_10_final 0,1
+transform xor_10 xor_10_final ground
+wire xor_10 python3 waveforms/nand.py
+strike xor_10
+disclose xor_10
+
+# XOR(1,1):
+#   NAND(1,1)=0
+#   NAND(1,0)=1
+#   NAND(1,0)=1
+#   NAND(1,1)=0
+
+presence xor_11_step1 1,1
+transform xor_11_s1 xor_11_step1 ground
+wire xor_11_s1 python3 waveforms/nand.py
+strike xor_11_s1
+
+presence xor_11_step2 1,0
+transform xor_11_s2 xor_11_step2 ground
+wire xor_11_s2 python3 waveforms/nand.py
+strike xor_11_s2
+
+presence xor_11_step3 1,0
+transform xor_11_s3 xor_11_step3 ground
+wire xor_11_s3 python3 waveforms/nand.py
+strike xor_11_s3
+
+presence xor_11_final 1,1
+transform xor_11 xor_11_final ground
+wire xor_11 python3 waveforms/nand.py
+strike xor_11
+disclose xor_11
+
+# XOR(1,0)=1, XOR(1,1)=0. Built from NAND. No new waveform.
+# Every gate above used the same waveform: python3 waveforms/nand.py
+# The gates are labels. The shapes are arrangements of NAND.
+# NAND is the only thing that touches the substrate.

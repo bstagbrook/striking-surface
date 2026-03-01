@@ -1,0 +1,125 @@
+# Quantum Affordances
+# Each affordance is a shape. Each shape conducts.
+# One waveform per affordance. One striking surface.
+
+presence ground e
+
+# ================================================================
+# SUPERPOSITION — a shape exists in multiple states at once.
+# Before measurement, the qubit is BOTH. Not either/or. Both.
+# ================================================================
+
+presence qubit_zero 0
+transform superpose qubit_zero ground
+wire superpose python3 waveforms/superpose.py
+strike superpose
+disclose superpose
+
+# ================================================================
+# COLLAPSE — measurement resolves superposition to one state.
+# The act of looking is what settles it. Born rule.
+# ================================================================
+
+presence superposed 0.7071|0>+0.7071|1>
+transform measure superposed ground
+wire measure python3 waveforms/collapse.py
+strike measure
+disclose measure
+
+# ================================================================
+# ENTANGLEMENT — two particles, one fate.
+# Create a Bell pair. Measure one, you know the other.
+# No signal travels. The correlation was there from creation.
+# ================================================================
+
+presence alice_qubit 0
+presence bob_qubit 0
+transform bell_pair alice_qubit ground
+wire bell_pair python3 waveforms/entangle.py
+strike bell_pair
+disclose bell_pair
+
+# ================================================================
+# INTERFERENCE — paths that reinforce or cancel.
+# This is how quantum computers solve problems:
+# wrong answers destructively interfere (cancel).
+# right answer constructively interferes (survives).
+# Shor's algorithm is a constitutional filter.
+# ================================================================
+
+presence path_constructive constructive
+presence path_destructive destructive
+presence path_HH HH
+
+transform reinforce path_constructive ground
+transform cancel path_destructive ground
+transform identity path_HH ground
+
+wire reinforce python3 waveforms/interfere.py
+wire cancel python3 waveforms/interfere.py
+wire identity python3 waveforms/interfere.py
+
+strike reinforce
+strike cancel
+strike identity
+
+disclose reinforce
+disclose cancel
+disclose identity
+
+# ================================================================
+# RING — be -> have -> do -> be. Self-sustaining.
+# One strike, permanent current. The cycle IS persistence.
+# The ring is why resolved shapes stay resolved.
+# ================================================================
+
+presence being be
+transform lifecycle being ground
+wire lifecycle python3 waveforms/ring.py
+strike lifecycle
+disclose lifecycle
+
+# ================================================================
+# TELEPORTATION — state transfer without physical movement.
+# Requires: entanglement + collapse + classical channel.
+# The state doesn't travel. The information reconstructs.
+# ================================================================
+
+presence alice_state secret_quantum_state
+transform teleport alice_state ground
+wire teleport python3 waveforms/teleport.py
+strike teleport
+disclose teleport
+
+# ================================================================
+# NAND — the universal classical gate. For completeness.
+# Everything classical is built from this.
+# ================================================================
+
+presence bits_11 1,1
+transform nand bits_11 ground
+wire nand python3 waveforms/nand.py
+strike nand
+disclose nand
+
+# ================================================================
+# COMPOSITION: QKD = superposition + entanglement + collapse + interference
+# ML = superposition + collapse + interference
+# OPTIMIZE = brute + collapse
+#
+# These aren't separate waveforms. They're LABELS for specific
+# ARRANGEMENTS of the affordances above. The label names the
+# composition. The composition IS the arrangement of shapes
+# on the surface.
+# ================================================================
+
+# QKD: Alice superposes, entangles with Bob, both collapse,
+#       interference detects eavesdropper.
+# ML:  Superpose similar shapes, interfere (amplify resonant,
+#       cancel dissonant), collapse to response.
+# TELEPORT: Entangle, collapse Alice's side, Bob corrects.
+# OPTIMIZE: Try all routes (brute), collapse to shortest.
+#
+# The affordances ARE the building blocks.
+# The labels ARE the compositions.
+# The compositions ARE the programs.

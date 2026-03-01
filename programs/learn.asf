@@ -1,0 +1,96 @@
+# === LESSON 1: Names ===
+# A label is a name you give a shape. The name is yours. You invent it.
+
+presence ten 10
+presence greeting hello
+presence home .
+
+# Those are YOUR words. "ten" "greeting" "home" — you chose them.
+# The shapes are 10, hello, and the current directory.
+# The labels are how you talk about them.
+
+# A shape can have more than one label.
+# "ten" is a label for 10. But so is:
+
+presence fingers 10
+presence decade 10
+
+# Same shape (10). Three labels. Three use cases.
+# "ten" when you're counting. "fingers" when you're talking about hands.
+# "decade" when you're talking about time.
+# The shape doesn't care what you call it. The label is for YOU.
+
+# === LESSON 2: Transformations are questions ===
+# A transformation says: I have THIS, I want THAT, and I don't know the path yet.
+
+presence ground e
+
+transform what_makes_ten ten ground
+transform what_makes_greeting greeting ground
+
+# "what_makes_ten" — that's a label YOU invented for a question:
+#   "What is 10 made of? Take it apart to ground."
+# "what_makes_greeting" — same question for "hello."
+
+# The hollow is there. The residue isn't. Not yet.
+
+# === LESSON 3: Waveforms answer questions ===
+# A waveform is a process that knows how to do one kind of work.
+# You wire it to a transformation. Then you strike.
+
+wire what_makes_ten python3 waveforms/factor.py
+wire what_makes_greeting python3 waveforms/decompose.py
+
+strike what_makes_ten
+strike what_makes_greeting
+
+# The waveform fired. Current flowed. Residue was deposited.
+# The hollow filled. The constitution was checked.
+# You didn't do anything. The shape did.
+
+disclose what_makes_ten
+disclose what_makes_greeting
+
+# === LESSON 4: Ask your own question ===
+# Count the science papers in this repo.
+
+presence science_dir science
+presence paper_pattern *.md
+
+transform how_many_papers science_dir ground
+wire how_many_papers python3 waveforms/count.py
+strike how_many_papers
+disclose how_many_papers
+
+# "how_many_papers" — YOUR label. YOUR question.
+# The waveform walked the directory. The residue is the chain of files.
+# Each shape in the residue is a paper.
+
+# === LESSON 5: Gauss ===
+# What's the sum of 1 to 10?
+# You already have "ten" on the surface. Use it.
+
+transform gauss ten ground
+wire gauss python3 waveforms/sum.py
+strike gauss
+disclose gauss
+
+# The label "gauss" — you named a transformation after the person
+# who saw that the shape of the sum IS the answer.
+# 10 + 9 + 8 + ... + 1 = 55. The residue shows the path.
+
+# === LESSON 6: Invent ===
+# Everything above used labels I chose. Now you choose.
+#
+# presence YOUR_NAME_FOR_IT your_value
+# transform YOUR_QUESTION your_source ground
+# wire YOUR_QUESTION python3 waveforms/some_waveform.py
+# strike YOUR_QUESTION
+# disclose YOUR_QUESTION
+#
+# Or write your own waveform. A waveform is any program that prints:
+#   source -> next
+#   next -> next
+#   next -> final
+# One line per step. The striking surface reads the lines,
+# checks the chain, and tells you if the constitution holds.
