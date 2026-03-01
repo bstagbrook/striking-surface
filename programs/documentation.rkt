@@ -1411,6 +1411,13 @@
 ;;;     constitutional: chain, grounded, complete, balanced,
 ;;;     minimal. Then strike.
 ;;;
+;;; Governance is a view of the Flownode Development Lifecycle
+;;; (Section 20):
+;;;   Transform = Ideate + Formalize
+;;;   Plan      = Strategy
+;;;   Alignment = Test
+;;;   Strike    = Fulfillment
+;;;
 ;;; Discussion can happen to establish the transform. No other
 ;;; work begins until alignment, unless a relevant exception is
 ;;; explicitly made.
@@ -1615,3 +1622,101 @@
   (transform 'nand-c (presence 'z "0,0") (ground) wf:nand))
   ;; Three O(1) transforms. No membrane needed.
   ;; Composition IS the program. Arrangement IS the power.
+
+
+;;; ═══════════════════════════════════════════════════════════════
+;;; SECTION 20: FLOWNODE DEVELOPMENT LIFECYCLE
+;;; ═══════════════════════════════════════════════════════════════
+;;;
+;;; Every flownode progresses through five stages:
+;;;
+;;;   1. IDEATE — many idea flownodes converge to one.
+;;;      in: idea flownodes. out: one single idea flownode.
+;;;
+;;;   2. FORMALIZE — declare the interface.
+;;;      What goes in, what comes out, specifically.
+;;;      This IS the definition of complete work.
+;;;      in: idea flownode. out: interface flownode.
+;;;
+;;;   3. STRATEGY — how to achieve the complete work.
+;;;      in: interface flownode. out: strategy flownode.
+;;;
+;;;   4. TEST — a fool-proof, reality-based method of knowing
+;;;      when complete work is present.
+;;;      in: strategy flownode. out: "not yet" flownode.
+;;;
+;;;   5. FULFILLMENT — demonstrate complete work.
+;;;      in: "not yet" flownode. out: demonstrating flownode.
+;;;
+;;; INDICATOR AND-CHAINING tracks progression:
+;;;
+;;;   ideated? ∧ formalized? ∧ strategized? ∧ tested? ∧ fulfilled?
+;;;
+;;; A partially-resolved chain carries information:
+;;;   ideated?✓ formalized?✓ strategized?✗
+;;;   = has an interface, strategy in progress.
+;;;
+;;; PLAYABLE NODES: a flownode with an interface (stage 2+)
+;;; but not yet fulfilled is "playable" — it can be placed on
+;;; the flowstack of the current flownode IDE. You can program
+;;; against the interface before the implementation exists.
+;;;
+;;; The governance process (Section 15) is a view of this lifecycle:
+;;;   Transform = Ideate + Formalize
+;;;   Plan = Strategy
+;;;   Alignment = Test
+;;;   Strike = Fulfillment
+
+(displayln "\n══════ SECTION 20: FLOWNODE DEVELOPMENT LIFECYCLE ══════")
+
+;; Example: building a NOT gate from NAND.
+;; We progress through all five lifecycle stages.
+
+;; STAGE 1: IDEATE
+;; Many ideas converge to one: NOT(x) can be built from NAND.
+(displayln "\n  --- Stage 1: IDEATE ---")
+(displayln "  idea: build NOT from NAND")
+(displayln "  ideated?✓")
+
+;; STAGE 2: FORMALIZE
+;; Interface: in = one bit (0 or 1), out = complement.
+;; Definition of complete work: NOT(0)=1, NOT(1)=0.
+(displayln "\n  --- Stage 2: FORMALIZE ---")
+(displayln "  interface: in=bit, out=complement")
+(displayln "  definition of complete work: NOT(0)=1, NOT(1)=0")
+(displayln "  ideated?✓ formalized?✓")
+(displayln "  [this flownode is now PLAYABLE]")
+
+;; STAGE 3: STRATEGY
+;; NOT(x) = NAND(x, x). Feed the same bit to both inputs.
+(displayln "\n  --- Stage 3: STRATEGY ---")
+(displayln "  strategy: NOT(x) = NAND(x, x)")
+(displayln "  ideated?✓ formalized?✓ strategized?✓")
+
+;; STAGE 4: TEST
+;; When NAND(0,0)=1 and NAND(1,1)=0, complete work is present.
+(displayln "\n  --- Stage 4: TEST ---")
+(displayln "  test: NAND(0,0) must yield 1, NAND(1,1) must yield 0")
+(displayln "  ideated?✓ formalized?✓ strategized?✓ tested?✓")
+
+;; STAGE 5: FULFILLMENT
+;; Demonstrate. Strike the circuit.
+(displayln "\n  --- Stage 5: FULFILLMENT ---")
+
+(surface
+  (transform 'not-0
+    (presence 'bit-0 "0,0")
+    (ground)
+    wf:nand)
+  (transform 'not-1
+    (presence 'bit-1 "1,1")
+    (ground)
+    wf:nand)
+  (disclose 'not-0)
+  (disclose 'not-1))
+  ;; NOT(0) = NAND(0,0) = 1  ✓
+  ;; NOT(1) = NAND(1,1) = 0  ✓
+  ;; Complete work demonstrated.
+
+(displayln "  ideated?✓ formalized?✓ strategized?✓ tested?✓ fulfilled?✓")
+(displayln "  All indicators resolved. Lifecycle complete.")
