@@ -58,6 +58,7 @@
     ["vowel" (member (string-downcase value) '("a" "e" "i" "o" "u"))]
     [_ #f]))
 
+; MEMBRANE: primality test is substrate trial division
 (define (prime? n)
   (cond [(<= n 1) #f] [(<= n 3) #t]
         [(= (modulo n 2) 0) #f]

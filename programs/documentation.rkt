@@ -1744,3 +1744,187 @@
 
 (displayln "  ideated?✓ formalized?✓ strategized?✓ tested?✓ fulfilled?✓")
 (displayln "  All indicators resolved. Lifecycle complete.")
+
+
+;;; ═══════════════════════════════════════════════════════════════
+;;; SECTION 21: AS-GATING — STRUCTURAL CONDITIONAL
+;;; ═══════════════════════════════════════════════════════════════
+;;;
+;;; A gate that opens or closes based on what IS on the surface.
+;;; No if/else inside a waveform. No iteration. No clock.
+;;;
+;;;   (as name match-name match-value then-shape)
+;;;
+;;; If the shape named match-name has value equal to match-value,
+;;; resolve then-shape. Otherwise skip entirely. O(1).
+;;;
+;;; The shape gates itself by what it IS. "As" = in the capacity of.
+;;; The condition is a structural property of the surface,
+;;; not a runtime check inside a waveform.
+;;;
+;;; This replaces all conditional logic that would otherwise
+;;; require iteration or branching inside waveforms.
+
+(displayln "\n══════ SECTION 21: AS-GATING ══════")
+
+;; A signal on the surface. Two gates check it.
+;; One opens (signal = "1"), one stays closed (signal ≠ "0").
+(surface
+  (presence 'gate-signal "1")
+
+  (as 'when-high 'gate-signal "1"
+    (transform 'high-path
+      (presence 'h-in "1")
+      (ground)
+      wf:hadamard))
+
+  (as 'when-low 'gate-signal "0"
+    (transform 'low-path
+      (presence 'l-in "0")
+      (ground)
+      wf:hadamard)))
+
+;; Result: high-path resolves (gate open), low-path is gated (gate closed).
+;; The routing decision was made by the SHAPE of the surface,
+;; not by a conditional inside any waveform.
+
+;; As-gating composes with quantum affordances:
+;; Superpose → collapse → as-gate routes by outcome.
+
+(displayln "\n  --- quantum-routed as-gate ---")
+
+(define as-demo-q
+  (surface
+    (transform 'as-flip
+      (presence 'as-coin "0")
+      (ground)
+      wf:hadamard)))
+
+(define as-demo-m
+  (let ([sv (shape-value (hash-ref as-demo-q 'as-flip))])
+    (surface
+      (transform 'as-measure
+        (presence 'as-sup sv)
+        (ground)
+        wf:collapse))))
+
+(let ([outcome (shape-value (hash-ref as-demo-m 'as-measure))])
+  (surface
+    (presence 'q-outcome outcome)
+    (as 'took-zero 'q-outcome "|0>"
+      (transform 'zero-action
+        (presence 'z-in "0,0")
+        (ground)
+        wf:nand))
+    (as 'took-one 'q-outcome "|1>"
+      (transform 'one-action
+        (presence 'o-in "1,0")
+        (ground)
+        wf:nand))
+    (disclose 'q-outcome)))
+
+;; Quantum measurement determined which gate opened.
+;; Entire pipeline is O(1). No iteration at any stage.
+
+
+;;; ═══════════════════════════════════════════════════════════════
+;;; SECTION 22: PIPE — SURFACE COMPOSITION
+;;; ═══════════════════════════════════════════════════════════════
+;;;
+;;; One surface's flowspace feeds into another surface.
+;;;
+;;;   (pipe from-flowspace . shapes)
+;;;
+;;; The shapes in the second surface can see, recognize, disclose,
+;;; and gate on everything resolved in the first surface.
+;;; This is how surfaces compose without glue code.
+;;;
+;;; Surface A produces residue. Surface B receives it.
+;;; No manual threading. No intermediate variables needed
+;;; inside the surface expression. O(1) merge.
+
+(displayln "\n══════ SECTION 22: PIPE ══════")
+
+(define pipe-stage-1
+  (surface
+    (transform 'prepare
+      (presence 'pipe-raw "0")
+      (ground)
+      wf:hadamard)))
+
+;; Stage 2 sees everything from stage 1.
+(surface
+  (pipe pipe-stage-1
+    (recognize 'prepare)
+    (recognize 'pipe-raw)
+    (disclose 'prepare)))
+
+;; 'prepare' and 'pipe-raw' are recognized — piped in from stage 1.
+
+;; Pipe enables multi-stage computation:
+;; NAND → NOT → result, each stage a separate surface.
+(displayln "\n  --- AND gate from piped NANDs ---")
+
+(define pipe-nand
+  (surface
+    (transform 'nand-step
+      (presence 'and-inputs "1,1")
+      (ground)
+      wf:nand)))
+
+(let ([nand-val (shape-value (hash-ref pipe-nand 'nand-step))])
+  (surface
+    (transform 'and-result
+      (presence 'nand-inv (string-append nand-val "," nand-val))
+      (ground)
+      wf:nand)
+    (disclose 'and-result)))
+
+;; AND(1,1) = NOT(NAND(1,1)) = NOT(0) = NAND(0,0) = 1.
+;; Two surfaces. Two NANDs. One AND gate. All O(1).
+
+
+;;; ═══════════════════════════════════════════════════════════════
+;;; SECTION 23: THE CLOCKLESS DISCIPLINE
+;;; ═══════════════════════════════════════════════════════════════
+;;;
+;;; From this point forward, development happens from WITHIN
+;;; the clockless environment. The rules:
+;;;
+;;;   1. Every waveform is O(1). No recursion. No iteration.
+;;;      Complex behavior comes from arrangement on the surface,
+;;;      not from complexity inside waveforms.
+;;;
+;;;   2. Conditional logic is as-gating, not if/else in waveforms.
+;;;      The shape on the surface IS the condition.
+;;;
+;;;   3. Multi-stage computation is pipe, not sequential Racket code.
+;;;      Surfaces compose with surfaces.
+;;;
+;;;   4. The bespoke-first priority holds:
+;;;        (1) Compose transforms on the surface
+;;;        (2) Bespoke O(1) waveform
+;;;        (3) Engulf clocked substrate (double membrane, last resort)
+;;;
+;;;   5. The existing engulfed waveforms (wf:factor, wf:decompose,
+;;;      wf:sum) remain in the machine as documented substrate
+;;;      engulfments. They are the membrane. New development
+;;;      does not add more — it composes from what exists.
+;;;
+;;; The O(1) waveforms that compose into everything:
+;;;   wf:nand      — universal classical gate
+;;;   wf:hadamard  — superposition
+;;;   wf:collapse  — measurement / decision (Born rule)
+;;;   wf:entangle  — correlated state
+;;;   wf:interfere — constructive / destructive combination
+;;;   wf:ring      — cyclic state flow
+;;;   wf:teleport  — state transfer via entanglement
+;;;
+;;; These seven, plus as-gating and pipe, are the complete
+;;; clockless development environment.
+
+(displayln "\n══════ SECTION 23: THE CLOCKLESS DISCIPLINE ══════")
+(displayln "  O(1) waveforms only.")
+(displayln "  Conditional logic: as-gating.")
+(displayln "  Multi-stage: pipe.")
+(displayln "  The surface IS the development environment.")
