@@ -1208,3 +1208,176 @@
 ;; Residue: 5 -> 10 -> 20 -> 40
 ;; chain✓ grounded✓ complete✓ balanced✓ minimal✓
 ;; )  complete.
+
+
+;;; ═══════════════════════════════════════════════════════════════
+;;; APPENDIX B: DISCOVERIES
+;;; ═══════════════════════════════════════════════════════════════
+;;;
+;;; Five structural properties discovered by experimenting with
+;;; the machine.
+
+
+;;; -----------------------------------------------------------
+;;; DISCOVERY 1: NESTING IS COMPOSITION
+;;; -----------------------------------------------------------
+;;;
+;;; A transform can be the source expression of another transform.
+;;; The inner transform resolves first — structural nesting
+;;; determines resolution order — and its result value flows
+;;; outward to become the source of the outer transform.
+;;;
+;;; You don't wire composition. You nest it. The Dyck word depth
+;;; IS the composition order.
+
+(displayln "\n══════ DISCOVERY 1: NESTING IS COMPOSITION ══════")
+
+(surface
+  ;; The inner transform (factor 360) resolves first.
+  ;; Its result value (5) becomes the source of the outer.
+  ;; The outer (decompose "5") resolves second.
+  ;; Two waveforms, composed by nesting. No manual wiring.
+  (transform 'outer
+    (transform 'inner
+      (presence 'seed 360)
+      (ground)
+      wf:factor)
+    (ground)
+    wf:decompose)
+  (disclose 'inner)
+  (disclose 'outer))
+  ;; inner: 360 -> 180 -> 90 -> 45 -> 15 -> 5
+  ;; outer: 5 -> e
+  ;; The nesting IS the composition.
+
+
+;;; -----------------------------------------------------------
+;;; DISCOVERY 2: CYCLES ARE CONSTITUTIONAL
+;;; -----------------------------------------------------------
+;;;
+;;; The ring waveform produces residue that returns to source:
+;;; be -> have -> do -> be. The last endpoint equals the first
+;;; start. The constitution says complete✓.
+;;;
+;;; "Complete" means current stopped. A cycle that returns to
+;;; origin HAS stopped — it's self-sustaining. The ring IS
+;;; constitutional. This is why persistence works. A complete
+;;; circuit doesn't have to arrive somewhere new. It can
+;;; arrive back.
+
+(displayln "\n══════ DISCOVERY 2: CYCLES ARE CONSTITUTIONAL ══════")
+
+(surface
+  (transform 'cycle
+    (presence 'start "be")
+    (ground)
+    wf:ring)
+  (disclose 'cycle))
+  ;; be -> have -> do -> be
+  ;; chain✓ grounded✓ complete✓ balanced✓ minimal✓
+  ;; The last step ends where the first step began.
+  ;; The circuit is closed. The ring persists.
+
+
+;;; -----------------------------------------------------------
+;;; DISCOVERY 3: THREE FAILURE MODES
+;;; -----------------------------------------------------------
+;;;
+;;; The constitution catches exactly three ways a circuit breaks:
+;;;
+;;;   1. WRONG START — residue doesn't begin from source.
+;;;      grounded✗. The current starts from the wrong place.
+;;;
+;;;   2. STASIS — a step goes nowhere (self-loop: a -> a).
+;;;      balanced✗. No progress is made.
+;;;
+;;;   3. BRANCHING — the path forks (two steps from same start).
+;;;      chain✗ and minimal✗. Current can't split.
+;;;
+;;; These are the ONLY ways a circuit breaks. Every other
+;;; configuration passes. The constitution is a complete
+;;; characterization of "broken circuit."
+
+(displayln "\n══════ DISCOVERY 3: THREE FAILURE MODES ══════")
+
+;; Failure mode 1: WRONG START (grounded✗)
+(define (wf:wrong-start source target)
+  (list (cons "wrong" "place")))
+
+(surface
+  (transform 'wrong-start
+    (presence 'x "hello")
+    (ground)
+    wf:wrong-start)
+  (disclose 'wrong-start))
+  ;; grounded✗ — residue starts from "wrong", not "hello"
+
+;; Failure mode 2: STASIS (balanced✗)
+(define (wf:self-loop source target)
+  (list (cons (->str source) (->str source))))
+
+(surface
+  (transform 'stasis
+    (presence 'y "7")
+    (ground)
+    wf:self-loop)
+  (disclose 'stasis))
+  ;; balanced✗ — 7 -> 7 makes no progress
+
+;; Failure mode 3: BRANCHING (chain✗ minimal✗)
+(define (wf:fork source target)
+  (list (cons (->str source) "left")
+        (cons (->str source) "right")))
+
+(surface
+  (transform 'branch
+    (presence 'z "alpha")
+    (ground)
+    wf:fork)
+  (disclose 'branch))
+  ;; chain✗ minimal✗ — current can't split
+
+
+;;; -----------------------------------------------------------
+;;; DISCOVERY 4: IRREDUCIBILITY = ALREADY AT GROUND
+;;; -----------------------------------------------------------
+;;;
+;;; Primes produce zero shapes of residue. All five constitution
+;;; checks pass on empty residue. A prime has no factors to
+;;; extract — it IS ground. There exists a class of shapes that
+;;; need no transformation. They are already complete.
+;;;
+;;; Empty residue is the most constitutional residue possible:
+;;; trivially chained, trivially grounded, trivially complete,
+;;; trivially balanced, trivially minimal.
+
+(displayln "\n══════ DISCOVERY 4: IRREDUCIBILITY ══════")
+
+(surface
+  (transform 'prime-2  (presence 'p2 2)  (ground) wf:factor)
+  (transform 'prime-7  (presence 'p7 7)  (ground) wf:factor)
+  (transform 'prime-97 (presence 'p97 97) (ground) wf:factor)
+  (disclose 'prime-2)
+  (disclose 'prime-7)
+  (disclose 'prime-97))
+  ;; All three: 0 shapes. chain✓ grounded✓ complete✓ balanced✓ minimal✓
+  ;; Already at ground. Nothing to do. Complete.
+
+
+;;; -----------------------------------------------------------
+;;; DISCOVERY 5: THE EMPTY SURFACE IS VALID
+;;; -----------------------------------------------------------
+;;;
+;;; (surface) with no shapes produces 0 shapes on the surface.
+;;; No error. No CUT. The machine with nothing on it is a valid
+;;; machine. This is the ground state of the machine itself —
+;;; the breadboard before any components. It is the identity
+;;; element of the surface, the same way "e" is the identity
+;;; element of ground.
+
+(displayln "\n══════ DISCOVERY 5: THE EMPTY SURFACE ══════")
+
+(surface)
+  ;; flowspace: 0 shapes on the surface
+  ;; The empty circuit is valid.
+  ;; The breadboard before any components.
