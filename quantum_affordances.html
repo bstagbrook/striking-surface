@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Striking Surface — Quantum Affordances</title>
+<style>
+/* ================================================================
+   CSS — QUANTUM LABORATORY CONTROL PANEL
+   ================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #06060c;
+  --surface: rgba(14, 14, 24, 0.75);
+  --surface-solid: #0e0e18;
+  --panel: rgba(16, 16, 30, 0.85);
+  --border: rgba(60, 60, 100, 0.3);
+  --border-glow: rgba(123, 104, 238, 0.4);
+  --text: #d0d0e0;
+  --text-bright: #eeeef8;
+  --dim: #5a5a7a;
+  --accent: #7b68ee;
+  --accent2: #a78bfa;
+  --cyan: #22d3ee;
+  --ok: #34d399;
+  --ok-glow: rgba(52, 211, 153, 0.3);
+  --fail: #f87171;
+  --fail-glow: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --blue: #60a5fa;
+  --pink: #f472b6;
+  --glass-blur: 20px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Background canvas */
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Main layout */
+#app {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: 56px 1fr 200px;
+  grid-template-columns: 340px 1fr;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ---- HEADER ---- */
+header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: var(--surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 20;
+}
+header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--cyan), var(--accent), transparent);
+  opacity: 0.6;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  position: relative;
+}
+.logo-icon .ring {
+  position: absolute;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  animation: logo-pulse 3s ease-in-out infinite;
+}
+.logo-icon .ring:nth-child(1) { top: 2px; left: 2px; width: 28px; height: 28px; }
+.logo-icon .ring:nth-child(2) { top: 6px; left: 6px; width: 20px; height: 20px; animation-delay: 0.5s; border-color: var(--cyan); }
+.logo-icon .ring:nth-child(3) { top: 11px; left: 11px; width: 10px; height: 10px; animation-delay: 1s; border-color: var(--ok); }
+@keyframes logo-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+.logo h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.logo .tagline {
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 1px;
+  margin-top: 1px;
+}
+
+/* Controls */
+.controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 8px 18px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(123, 104, 238, 0.08);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(123,104,238,0.15), transparent);
+  transition: left 0.5s;
+}
+.btn:hover::before { left: 100%; }
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--text-bright);
+  box-shadow: 0 0 20px rgba(123, 104, 238, 0.2);
+}
+.btn.primary {
+  background: linear-gradient(135deg, var(--accent), #6d5ce7);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(123, 104, 238, 0.3);
+}
+.btn.primary:hover {
+  box-shadow: 0 0 30px rgba(123, 104, 238, 0.5);
+  transform: translateY(-1px);
+}
+.btn:active { transform: scale(0.97); }
+.btn .key-hint {
+  font-size: 9px;
+  opacity: 0.5;
+  margin-left: 6px;
+}
+.program-select {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: rgba(123,104,238,0.08);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5a7a'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+.program-select:hover { border-color: var(--accent); }
+.program-select option { background: var(--surface-solid); color: var(--text); }
+
+/* Execution progress bar */
+#progress-bar {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--cyan));
+  width: 0%;
+  transition: width 0.15s ease;
+  z-index: 30;
+}
+
+/* ---- SOURCE DRAWER (left) ---- */
+#source-drawer {
+  grid-row: 2 / 4;
+  background: var(--panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.3s ease;
+  z-index: 10;
+}
+.drawer-header {
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#source-editor {
+  flex: 1;
+  background: transparent;
+  color: var(--text);
+  border: none;
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  resize: none;
+  outline: none;
+  overflow-y: auto;
+  tab-size: 2;
+}
+#source-editor::selection { background: rgba(123,104,238,0.3); }
+#source-editor::-webkit-scrollbar { width: 4px; }
+#source-editor::-webkit-scrollbar-track { background: transparent; }
+#source-editor::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ---- GRAPH VIEWPORT (center) ---- */
+#graph-viewport {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+}
+#graph-canvas {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+#graph-canvas:active { cursor: grabbing; }
+
+/* Node tooltip */
+#tooltip {
+  position: fixed;
+  z-index: 100;
+  background: var(--panel);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glow);
+  border-radius: 10px;
+  padding: 14px 18px;
+  max-width: 380px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(123,104,238,0.1);
+}
+#tooltip.visible { opacity: 1; transform: translateY(0); }
+#tooltip .tt-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+#tooltip .tt-type {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+#tooltip .tt-value {
+  color: var(--text);
+  word-break: break-all;
+}
+#tooltip .tt-residue {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+#tooltip .tt-step {
+  color: var(--dim);
+  padding: 1px 0;
+}
+#tooltip .tt-step .arr { color: var(--accent); }
+
+/* ---- CONSOLE DRAWER (bottom) ---- */
+#console-drawer {
+  grid-column: 2;
+  background: var(--panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10;
+  position: relative;
+}
+#console-drawer::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,0.3), transparent);
+}
+#console-output {
+  flex: 1;
+  padding: 12px 20px;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+}
+#console-output::-webkit-scrollbar { width: 4px; }
+#console-output::-webkit-scrollbar-track { background: transparent; }
+#console-output::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.c-line { padding: 1px 0; white-space: pre-wrap; word-break: break-all; opacity: 0; animation: line-appear 0.15s ease forwards; }
+@keyframes line-appear { to { opacity: 1; } }
+.c-presence { color: var(--blue); }
+.c-transform { color: var(--warn); }
+.c-wire { color: var(--dim); }
+.c-strike { color: var(--accent2); }
+.c-ok { color: var(--ok); }
+.c-fail { color: var(--fail); }
+.c-complete { color: var(--ok); font-weight: 600; text-shadow: 0 0 10px var(--ok-glow); }
+.c-cut { color: var(--fail); font-weight: 600; text-shadow: 0 0 10px var(--fail-glow); }
+.c-disclose { color: var(--cyan); }
+.c-recognize { color: var(--warn); }
+.c-comment { color: #333348; font-style: italic; }
+.c-section { color: var(--accent); font-weight: 600; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(123,104,238,0.15); }
+
+/* ---- BLOCH SPHERE ---- */
+#bloch-widget {
+  position: fixed;
+  bottom: 220px;
+  right: 20px;
+  width: 160px;
+  height: 200px;
+  z-index: 50;
+  background: var(--panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  transition: opacity 0.3s;
+}
+#bloch-widget .bw-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-align: center;
+  margin-bottom: 4px;
+}
+#bloch-canvas {
+  width: 140px;
+  height: 140px;
+  display: block;
+  margin: 0 auto;
+}
+#bloch-state {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--accent2);
+  text-align: center;
+  margin-top: 4px;
+  min-height: 14px;
+}
+
+/* ---- STATS OVERLAY ---- */
+#stats-overlay {
+  position: fixed;
+  top: 66px;
+  right: 16px;
+  z-index: 50;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--dim);
+  display: flex;
+  gap: 16px;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+#stats-overlay .stat-val { color: var(--text-bright); font-weight: 600; }
+
+/* Legend */
+#legend {
+  position: fixed;
+  top: 110px;
+  right: 16px;
+  z-index: 50;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  line-height: 1.9;
+}
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  #app { grid-template-columns: 1fr; grid-template-rows: 56px 1fr 160px; }
+  #source-drawer { display: none; }
+  #bloch-widget { display: none; }
+  #console-drawer { grid-column: 1; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div id="app">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+      </div>
+      <div>
+        <h1>Striking Surface</h1>
+        <div class="tagline">quantum affordances laboratory</div>
+      </div>
+    </div>
+    <div class="controls">
+      <select class="program-select" id="program-select">
+        <option value="quantum_affordances">quantum_affordances</option>
+        <option value="gates">gates</option>
+        <option value="os">os</option>
+        <option value="learn">learn</option>
+        <option value="custom">custom</option>
+      </select>
+      <button class="btn" id="btn-step">Step<span class="key-hint">Space</span></button>
+      <button class="btn primary" id="btn-run">Strike All<span class="key-hint">Enter</span></button>
+      <button class="btn" id="btn-reset">Reset<span class="key-hint">R</span></button>
+    </div>
+    <div id="progress-bar"></div>
+  </header>
+
+  <div id="source-drawer">
+    <div class="drawer-header">
+      <span>Source</span>
+    </div>
+    <textarea id="source-editor" spellcheck="false"></textarea>
+  </div>
+
+  <div id="graph-viewport">
+    <canvas id="graph-canvas"></canvas>
+  </div>
+
+  <div id="console-drawer">
+    <div class="drawer-header"><span>Console</span></div>
+    <div id="console-output"></div>
+  </div>
+</div>
+
+<div id="tooltip">
+  <div class="tt-name"></div>
+  <div class="tt-type"></div>
+  <div class="tt-value"></div>
+  <div class="tt-residue"></div>
+</div>
+
+<div id="bloch-widget">
+  <div class="bw-title">Bloch Sphere</div>
+  <canvas id="bloch-canvas" width="280" height="280"></canvas>
+  <div id="bloch-state">|0&#x27E9;</div>
+</div>
+
+<div id="stats-overlay">
+  <span>shapes <span class="stat-val" id="stat-shapes">0</span></span>
+  <span>transforms <span class="stat-val" id="stat-transforms">0</span></span>
+  <span>complete <span class="stat-val" id="stat-complete">0</span></span>
+  <span>cut <span class="stat-val" id="stat-cut">0</span></span>
+</div>
+
+<div id="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div><span style="color:var(--dim)">presence</span></div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--warn);opacity:0.7"></div><span style="color:var(--dim)">transform (hollow)</span></div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--ok)"></div><span style="color:var(--dim)">complete</span></div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--fail)"></div><span style="color:var(--dim)">CUT</span></div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div><span style="color:var(--dim)">residue edge</span></div>
+</div>
+
+<script>
+// ============================================================
+// WAVEFORMS — faithful JavaScript ports
+// ============================================================
+const Waveforms = {
+  'waveforms/superpose.py': function(source, target) {
+    const s2 = (1/Math.sqrt(2)).toFixed(4);
+    if (source==='0'||source==='|0>') return [`${source} -> ${s2}|0>+${s2}|1>`];
+    if (source==='1'||source==='|1>') return [`${source} -> ${s2}|0>-${s2}|1>`];
+    return [`${source} -> superposition(${source})`];
+  },
+  'waveforms/collapse.py': function(source) {
+    if (source.includes('|0>') && source.includes('|1>')) {
+      const parts = source.replace(/\+/g,' ').replace(/-/g,' -').split(/\s+/).filter(Boolean);
+      let a0=0,a1=0;
+      for (const p of parts) { if(p.includes('|0>')) a0=parseFloat(p.replace('|0>','')); else if(p.includes('|1>')) a1=parseFloat(p.replace('|1>','')); }
+      const outcome = Math.random() < a0*a0 ? '|0>' : '|1>';
+      return [`${source} -> ${outcome}`];
+    }
+    return [`${source} -> ${source}`];
+  },
+  'waveforms/entangle.py': function(source, target) {
+    const a=source, b=target||'0', s2=(1/Math.sqrt(2)).toFixed(4);
+    if ((a==='0'||a==='|0>')&&(b==='0'||b==='|0>'||b==='ground'||b==='e'))
+      return [`${a} -> H(${a})x${b}`, `H(${a})x${b} -> ${s2}|00>+${s2}|11>`];
+    return [`${a} -> bell(${a},${b})`];
+  },
+  'waveforms/interfere.py': function(source) {
+    const s2=(1/Math.sqrt(2)).toFixed(4);
+    if (source==='constructive') return [`constructive -> ${s2}|x>+${s2}|x>`, `${s2}|x>+${s2}|x> -> 1.0000|x>`];
+    if (source==='destructive') return [`destructive -> ${s2}|x>-${s2}|x>`, `${s2}|x>-${s2}|x> -> 0.0000|x>`];
+    if (source==='HH') return [`HH -> ${s2}|0>+${s2}|1>`, `${s2}|0>+${s2}|1> -> |0>`];
+    return [`${source} -> interfere(${source})`];
+  },
+  'waveforms/ring.py': function(source) {
+    const cycle=['be','have','do'], lines=[]; let cur=source;
+    for(let i=0;i<3;i++){let idx=cycle.indexOf(cur);if(idx<0)idx=0;const n=cycle[(idx+1)%3];lines.push(`${cur} -> ${n}`);cur=n;}
+    return lines;
+  },
+  'waveforms/teleport.py': function(source) {
+    return [`${source} -> bell_pair+${source}`,`bell_pair+${source} -> alice_measures`,`alice_measures -> classical_bits(2)`,`classical_bits(2) -> bob_corrects`,`bob_corrects -> bob(${source})`];
+  },
+  'waveforms/nand.py': function(source) {
+    const [a,b]=source.split(',').map(Number); return [`${source} -> ${(a&&b)?0:1}`];
+  },
+  'waveforms/factor.py': function(source) {
+    let n=parseInt(source); if(isNaN(n)||n<2) return [`${source} -> ${source}`];
+    let cur=n, d=2; const lines=[];
+    while(d*d<=cur){while(cur%d===0){const nxt=Math.floor(cur/d);lines.push(`${cur} -> ${nxt}`);cur=nxt;}d++;}
+    return lines;
+  },
+  'waveforms/decompose.py': function(source) {
+    let cur=source; const lines=[];
+    while(cur.length>0){const nxt=cur.length>1?cur.slice(0,-1):'e';lines.push(`${cur} -> ${nxt}`);cur=nxt!=='e'?nxt:'';}
+    return lines;
+  },
+  'waveforms/count.py': function(source) { return [`${source} -> (browser: filesystem n/a)`]; },
+  'waveforms/sum.py': function(source) {
+    let n=parseInt(source); if(isNaN(n)||n<1) return [`${source} -> ${source}`];
+    let cur=n,tot=n; const lines=[];
+    for(let i=n-1;i>=1;i--){const nxt=tot+i;lines.push(`${cur} -> ${nxt}`);cur=nxt;tot=nxt;}
+    return lines;
+  },
+  'waveforms/tree.py': function(source) {
+    const files=['strike.py','programs/gates.asf','programs/learn.asf','programs/os.asf','programs/quantum.asf','programs/quantum_affordances.asf','waveforms/collapse.py','waveforms/count.py','waveforms/decompose.py','waveforms/entangle.py','waveforms/factor.py','waveforms/interfere.py','waveforms/listdir.py','waveforms/nand.py','waveforms/readfile.py','waveforms/ring.py','waveforms/sum.py','waveforms/superpose.py','waveforms/teleport.py','waveforms/tree.py'];
+    const lines=[]; let prev=source; for(const f of files){lines.push(`${prev} -> ${f}`);prev=f;} return lines;
+  },
+  'waveforms/readfile.py': function(source) { return [`${source} -> (browser: file read n/a)`]; },
+  'waveforms/listdir.py': function(source) { return [`${source} -> (browser: dir list n/a)`]; }
+};
+function resolveWaveform(cmd){return Waveforms[cmd.replace(/^python3\s+/,'').trim()]||null;}
+
+// ============================================================
+// STRIKING SURFACE — runtime engine
+// ============================================================
+class StrikingSurface {
+  constructor(){this.F={};this.output=[];this.listeners=[];}
+  reset(){this.F={};this.output=[];}
+  emit(s,cls){const o={text:s,cls:cls||''};this.output.push(o);for(const fn of this.listeners)fn(o);}
+  onEmit(fn){this.listeners.push(fn);}
+  verify(source,target,residue){
+    if(!residue||!residue.length){
+      if(String(target)==='ground'||String(target)==='e'||String(source)===String(target)) return[true,"at ground"];
+      return[false,"empty"];
+    }
+    let chain=true;for(let i=0;i<residue.length-1;i++)if(residue[i][1]!==residue[i+1][0]){chain=false;break;}
+    const grounded=residue[0][0]===String(source);
+    const complete=residue[residue.length-1][1]===String(target)||String(target)==='ground'||String(target)==='e';
+    const bal=residue.every(r=>r[0]!==r[1]);
+    const starts=new Set(residue.map(r=>r[0]));
+    const minimal=starts.size===residue.length;
+    const ok=chain&&grounded&&complete&&bal&&minimal;
+    const s=`chain${chain?'\u2713':'\u2717'} grounded${grounded?'\u2713':'\u2717'} complete${complete?'\u2713':'\u2717'} balanced${bal?'\u2713':'\u2717'} minimal${minimal?'\u2713':'\u2717'}`;
+    return[ok,s];
+  }
+  execLine(line){
+    line=line.trim();
+    if(!line||line.startsWith('#')){if(line&&line.includes('==='))this.emit(line,'c-section');else if(line)this.emit(line,'c-comment');return null;}
+    const parts=line.split(/\s+/);const op=parts[0];
+    if(op==='presence'){const nm=parts[1],val=parts.slice(2).join(' ')||'()';this.F[nm]=val;this.emit(`  (${nm})`,'c-presence');return{op,name:nm};}
+    else if(op==='contain'){const o=parts[1],i=parts[2];let cur=this.F[o]||[];if(!Array.isArray(cur))cur=[cur];cur.push(this.F[i]||i);this.F[o]=cur;this.emit(`  ((${i}) in (${o}))`,'c-presence');return{op};}
+    else if(op==='label'){this.F[parts[2]]=this.F[parts[1]]||parts[1];this.emit(`  e:${parts[2]} -> (${parts[1]})`,'c-presence');return{op};}
+    else if(op==='transform'){
+      const p=line.split(/\s+/);
+      let src=this.F[p[2]]||p[2];if(typeof src==='object'&&src!==null&&!Array.isArray(src)&&src.r&&src.r.length)src=src.r[src.r.length-1][1];
+      let tgt=this.F[p[3]]||p[3];if(typeof tgt==='object'&&tgt!==null&&!Array.isArray(tgt)&&tgt.r&&tgt.r.length)tgt=tgt.r[tgt.r.length-1][1];
+      this.F[p[1]]={s:String(src),t:String(tgt),w:null,r:[]};
+      this.emit(`  (${p[1]}): (${p[2]}) -> (${p[3]}) (())`,'c-transform');return{op,name:p[1]};
+    }
+    else if(op==='wire'){const nm=parts[1],cmd=parts.slice(2).join(' ');if(this.F[nm]&&typeof this.F[nm]==='object'&&!Array.isArray(this.F[nm])){this.F[nm].w=cmd;this.emit(`  (${nm}) ~ ${cmd}`,'c-wire');}return{op,name:nm};}
+    else if(op==='strike'){
+      const nm=parts[1],t=this.F[nm];
+      if(t&&typeof t==='object'&&!Array.isArray(t)&&t.w){
+        const wfn=resolveWaveform(t.w);
+        if(wfn){
+          const raw=wfn(t.s,t.t),residue=[];
+          for(const rl of raw){if(rl.includes('->')){const[a,b]=rl.split('->',2);residue.push([a.trim(),b.trim()]);}}
+          t.r=residue;const[ok,status]=this.verify(t.s,t.t,residue);
+          this.emit(`  strike ${nm}: ${residue.length} shapes`,'c-strike');
+          this.emit(`  ${status}`,ok?'c-ok':'c-fail');
+          this.emit(ok?'  )  complete.':'  CUT',ok?'c-complete':'c-cut');
+          return{op,name:nm,ok};
+        } else { this.emit(`  strike ${nm}: waveform not found`,'c-cut'); return{op,name:nm,ok:false}; }
+      }
+      return{op,name:nm};
+    }
+    else if(op==='recognize'){const nm=parts[1];this.emit(`  ${nm in this.F?'recognized':'absent'}: (${nm})`,'c-recognize');return{op};}
+    else if(op==='disclose'){
+      const nm=parts[1],shape=this.F[nm];
+      if(shape===undefined||shape===null){this.emit('  absent','c-disclose');}
+      else if(typeof shape==='object'&&!Array.isArray(shape)&&'s' in shape){
+        this.emit(`  META: ${nm}`,'c-disclose');
+        this.emit(`  OUTSIDE: (${shape.s}) -> (${shape.t}) [${shape.r.length} shapes]`,'c-disclose');
+        for(const r of shape.r)this.emit(`    ${r[0]} -> ${r[1]}`,'c-disclose');
+      } else { this.emit(`  (${nm}) = ${shape}`,'c-disclose'); }
+      return{op,name:nm};
+    }
+    return null;
+  }
+}
+
+// ============================================================
+// EMBEDDED PROGRAMS
+// ============================================================
+const PROGRAMS = {};
+PROGRAMS.quantum_affordances = `# Quantum Affordances
+# Each affordance is a shape. Each shape conducts.
+# One waveform per affordance. One striking surface.
+
+presence ground e
+
+# ================================================================
+# SUPERPOSITION \u2014 a shape exists in multiple states at once.
+# Before measurement, the qubit is BOTH. Not either/or. Both.
+# ================================================================
+
+presence qubit_zero 0
+transform superpose qubit_zero ground
+wire superpose python3 waveforms/superpose.py
+strike superpose
+disclose superpose
+
+# ================================================================
+# COLLAPSE \u2014 measurement resolves superposition to one state.
+# The act of looking is what settles it. Born rule.
+# ================================================================
+
+presence superposed 0.7071|0>+0.7071|1>
+transform measure superposed ground
+wire measure python3 waveforms/collapse.py
+strike measure
+disclose measure
+
+# ================================================================
+# ENTANGLEMENT \u2014 two particles, one fate.
+# Create a Bell pair. Measure one, you know the other.
+# No signal travels. The correlation was there from creation.
+# ================================================================
+
+presence alice_qubit 0
+presence bob_qubit 0
+transform bell_pair alice_qubit ground
+wire bell_pair python3 waveforms/entangle.py
+strike bell_pair
+disclose bell_pair
+
+# ================================================================
+# INTERFERENCE \u2014 paths that reinforce or cancel.
+# wrong answers destructively interfere (cancel).
+# right answer constructively interferes (survives).
+# ================================================================
+
+presence path_constructive constructive
+presence path_destructive destructive
+presence path_HH HH
+
+transform reinforce path_constructive ground
+transform cancel path_destructive ground
+transform identity path_HH ground
+
+wire reinforce python3 waveforms/interfere.py
+wire cancel python3 waveforms/interfere.py
+wire identity python3 waveforms/interfere.py
+
+strike reinforce
+strike cancel
+strike identity
+
+disclose reinforce
+disclose cancel
+disclose identity
+
+# ================================================================
+# RING \u2014 be -> have -> do -> be. Self-sustaining.
+# One strike, permanent current. The cycle IS persistence.
+# ================================================================
+
+presence being be
+transform lifecycle being ground
+wire lifecycle python3 waveforms/ring.py
+strike lifecycle
+disclose lifecycle
+
+# ================================================================
+# TELEPORTATION \u2014 state transfer without physical movement.
+# Requires: entanglement + collapse + classical channel.
+# ================================================================
+
+presence alice_state secret_quantum_state
+transform teleport alice_state ground
+wire teleport python3 waveforms/teleport.py
+strike teleport
+disclose teleport
+
+# ================================================================
+# NAND \u2014 the universal classical gate.
+# Everything classical is built from this.
+# ================================================================
+
+presence bits_11 1,1
+transform nand bits_11 ground
+wire nand python3 waveforms/nand.py
+strike nand
+disclose nand`;
+
+PROGRAMS.gates = `# Logic gates from NAND.
+# NAND is the only waveform. Everything else is a shape.
+
+presence ground e
+
+presence both_true 1,1
+presence one_true 1,0
+presence other_true 0,1
+presence both_false 0,0
+
+transform nand_11 both_true ground
+transform nand_10 one_true ground
+transform nand_01 other_true ground
+transform nand_00 both_false ground
+
+wire nand_11 python3 waveforms/nand.py
+wire nand_10 python3 waveforms/nand.py
+wire nand_01 python3 waveforms/nand.py
+wire nand_00 python3 waveforms/nand.py
+
+strike nand_11
+strike nand_10
+strike nand_01
+strike nand_00
+
+disclose nand_11
+disclose nand_10
+disclose nand_01
+disclose nand_00
+
+# NOT: NAND(A,A)
+presence one_one 1,1
+presence zero_zero 0,0
+transform not_1 one_one ground
+transform not_0 zero_zero ground
+wire not_1 python3 waveforms/nand.py
+wire not_0 python3 waveforms/nand.py
+strike not_1
+strike not_0
+disclose not_1
+disclose not_0
+
+# AND: NAND then NOT
+presence and_11_mid 0,0
+transform and_11 and_11_mid ground
+wire and_11 python3 waveforms/nand.py
+strike and_11
+disclose and_11
+
+presence and_10_mid 1,1
+transform and_10 and_10_mid ground
+wire and_10 python3 waveforms/nand.py
+strike and_10
+disclose and_10
+
+# OR: NAND(NOT(A), NOT(B))
+presence or_10_mid 0,1
+transform or_10 or_10_mid ground
+wire or_10 python3 waveforms/nand.py
+strike or_10
+disclose or_10
+
+presence or_00_mid 1,1
+transform or_00 or_00_mid ground
+wire or_00 python3 waveforms/nand.py
+strike or_00
+disclose or_00`;
+
+PROGRAMS.os = `# The ASF Operating System
+
+presence ground e
+presence sixty 60
+presence twelve 12
+presence hello hello
+presence ninetyseven 97
+
+transform factor60 sixty ground
+transform factor12 twelve ground
+transform greet hello e
+transform prime97 ninetyseven ground
+
+wire factor60 python3 waveforms/factor.py
+wire factor12 python3 waveforms/factor.py
+wire greet python3 waveforms/decompose.py
+wire prime97 python3 waveforms/factor.py
+
+strike factor60
+strike factor12
+strike greet
+strike prime97
+
+disclose factor60
+disclose factor12
+disclose greet
+disclose prime97
+
+recognize factor60
+recognize missing`;
+
+PROGRAMS.learn = `# === LESSON 1: Names ===
+presence ten 10
+presence greeting hello
+presence home .
+presence fingers 10
+presence decade 10
+presence ground e
+
+# === LESSON 2: Transformations are questions ===
+transform what_makes_ten ten ground
+transform what_makes_greeting greeting ground
+
+# === LESSON 3: Waveforms answer questions ===
+wire what_makes_ten python3 waveforms/factor.py
+wire what_makes_greeting python3 waveforms/decompose.py
+strike what_makes_ten
+strike what_makes_greeting
+disclose what_makes_ten
+disclose what_makes_greeting
+
+# === LESSON 5: Gauss ===
+transform gauss ten ground
+wire gauss python3 waveforms/sum.py
+strike gauss
+disclose gauss`;
+
+
+// ============================================================
+// PARTICLE BACKGROUND
+// ============================================================
+class ParticleBackground {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.particles = [];
+    this.ripples = [];
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    this.initParticles();
+  }
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width = window.innerWidth * dpr;
+    this.canvas.height = window.innerHeight * dpr;
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.W = window.innerWidth;
+    this.H = window.innerHeight;
+  }
+  initParticles() {
+    this.particles = [];
+    const count = Math.floor((this.W * this.H) / 12000);
+    for (let i = 0; i < count; i++) {
+      this.particles.push({
+        x: Math.random() * this.W, y: Math.random() * this.H,
+        vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.5 + 0.5,
+        phase: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.005 + 0.002,
+        hue: Math.random() < 0.5 ? 255 : 190,
+        sat: 70 + Math.random() * 30,
+        alpha: 0.15 + Math.random() * 0.25
+      });
+    }
+  }
+  addRipple(x, y, color) {
+    this.ripples.push({ x, y, r: 0, maxR: 200, alpha: 0.35, color, speed: 2.5 });
+  }
+  draw(t) {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.W, this.H);
+    // Connections
+    for (let i = 0; i < this.particles.length; i++) {
+      const pi = this.particles[i];
+      for (let j = i + 1; j < this.particles.length; j++) {
+        const pj = this.particles[j];
+        const dx = pi.x - pj.x, dy = pi.y - pj.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 100) {
+          ctx.beginPath(); ctx.moveTo(pi.x, pi.y); ctx.lineTo(pj.x, pj.y);
+          ctx.strokeStyle = `rgba(123,104,238,${(1-dist/100)*0.08})`;
+          ctx.lineWidth = 0.5; ctx.stroke();
+        }
+      }
+    }
+    // Particles
+    for (const p of this.particles) {
+      p.phase += p.speed;
+      p.x += p.vx + Math.sin(p.phase) * 0.15;
+      p.y += p.vy + Math.cos(p.phase * 0.7) * 0.1;
+      if (p.x < -10) p.x = this.W + 10; if (p.x > this.W + 10) p.x = -10;
+      if (p.y < -10) p.y = this.H + 10; if (p.y > this.H + 10) p.y = -10;
+      const flicker = 0.7 + Math.sin(p.phase * 3) * 0.3;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue},${p.sat}%,70%,${p.alpha*flicker})`; ctx.fill();
+    }
+    // Ripples
+    for (let i = this.ripples.length - 1; i >= 0; i--) {
+      const rp = this.ripples[i];
+      rp.r += rp.speed; rp.alpha -= 0.004;
+      if (rp.alpha <= 0) { this.ripples.splice(i, 1); continue; }
+      ctx.beginPath(); ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+      ctx.strokeStyle = rp.color.replace(/[\d.]+\)$/, rp.alpha + ')');
+      ctx.lineWidth = 1.5; ctx.stroke();
+    }
+  }
+}
+
+
+// ============================================================
+// FLOW GRAPH — force-directed node visualization
+// ============================================================
+class FlowGraph {
+  constructor(canvas, surface, bgSystem) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.surface = surface;
+    this.bg = bgSystem;
+    this.nodes = [];
+    this.edges = [];
+    this.edgeParticles = [];
+    this.dragging = null;
+    this.hovered = null;
+    this.strikeFlashes = [];
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    this.setupInteraction();
+  }
+  resize() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.height = rect.height + 'px';
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.W = rect.width;
+    this.H = rect.height;
+  }
+  setupInteraction() {
+    const c = this.canvas;
+    c.addEventListener('mousemove', e => {
+      const rect = c.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      if (this.dragging) {
+        this.dragging.x = mx; this.dragging.y = my;
+        this.dragging.fx = mx; this.dragging.fy = my;
+      } else {
+        let found = null;
+        for (const n of this.nodes) {
+          const dx = n.x - mx, dy = n.y - my;
+          if (Math.sqrt(dx*dx+dy*dy) < n.radius + 8) { found = n; break; }
+        }
+        this.hovered = found;
+        c.style.cursor = found ? 'pointer' : 'grab';
+        this.updateTooltip(found, e.clientX, e.clientY);
+      }
+    });
+    c.addEventListener('mousedown', () => {
+      if (this.hovered) { this.dragging = this.hovered; this.dragging.fx = this.dragging.x; this.dragging.fy = this.dragging.y; c.style.cursor = 'grabbing'; }
+    });
+    c.addEventListener('mouseup', () => { if (this.dragging) { delete this.dragging.fx; delete this.dragging.fy; this.dragging = null; } });
+    c.addEventListener('mouseleave', () => { this.hovered = null; this.updateTooltip(null); });
+  }
+
+  updateTooltip(node, cx, cy) {
+    const tt = document.getElementById('tooltip');
+    if (!node) { tt.classList.remove('visible'); return; }
+    const shape = this.surface.F[node.name];
+    tt.querySelector('.tt-name').textContent = node.name;
+    if (typeof shape === 'object' && !Array.isArray(shape) && 's' in shape) {
+      const [ok] = this.surface.verify(shape.s, shape.t, shape.r);
+      tt.querySelector('.tt-type').textContent = shape.r.length ? (ok ? 'TRANSFORM \u2014 COMPLETE' : 'TRANSFORM \u2014 CUT') : 'TRANSFORM \u2014 HOLLOW';
+      tt.querySelector('.tt-value').textContent = `(${shape.s}) \u2192 (${shape.t})`;
+      let resHTML = '';
+      if (shape.r.length) { for (const r of shape.r) resHTML += `<div class="tt-step">${esc(r[0])} <span class="arr">\u2192</span> ${esc(r[1])}</div>`; }
+      tt.querySelector('.tt-residue').innerHTML = resHTML;
+    } else {
+      tt.querySelector('.tt-type').textContent = 'PRESENCE';
+      tt.querySelector('.tt-value').textContent = String(shape);
+      tt.querySelector('.tt-residue').innerHTML = '';
+    }
+    // Keep tooltip in viewport
+    const ttW = 380, ttH = 200;
+    let tx = cx + 16, ty = cy - 10;
+    if (tx + ttW > window.innerWidth) tx = cx - ttW - 16;
+    if (ty + ttH > window.innerHeight) ty = window.innerHeight - ttH - 10;
+    tt.style.left = tx + 'px'; tt.style.top = ty + 'px';
+    tt.classList.add('visible');
+  }
+
+  buildGraph() {
+    const F = this.surface.F;
+    const entries = Object.entries(F);
+    const existingPositions = {};
+    for (const n of this.nodes) existingPositions[n.name] = { x: n.x, y: n.y };
+
+    this.nodes = [];
+    this.edges = [];
+    const nodeMap = {};
+    const cx = this.W / 2, cy = this.H / 2;
+    const count = entries.length;
+    const baseRadius = Math.min(this.W, this.H) * 0.3;
+
+    for (let i = 0; i < count; i++) {
+      const [name, shape] = entries[i];
+      const isTransform = typeof shape === 'object' && !Array.isArray(shape) && 's' in shape;
+      let status = 'presence';
+      if (isTransform) {
+        if (shape.r && shape.r.length) {
+          const [ok] = this.surface.verify(shape.s, shape.t, shape.r);
+          status = ok ? 'complete' : 'cut';
+        } else { status = 'hollow'; }
+      }
+      const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+      const existing = existingPositions[name];
+      const node = {
+        name,
+        x: existing ? existing.x : cx + Math.cos(angle) * baseRadius + (Math.random()-0.5)*30,
+        y: existing ? existing.y : cy + Math.sin(angle) * baseRadius + (Math.random()-0.5)*30,
+        vx: 0, vy: 0,
+        radius: isTransform ? 16 : 11,
+        status, isTransform,
+        phase: Math.random() * Math.PI * 2
+      };
+      this.nodes.push(node);
+      nodeMap[name] = node;
+    }
+
+    // Edges: connect transforms to their source presence nodes
+    for (const [name, shape] of entries) {
+      if (typeof shape === 'object' && !Array.isArray(shape) && 's' in shape) {
+        const transformNode = nodeMap[name];
+        if (!transformNode) continue;
+        for (const [otherName, otherShape] of entries) {
+          if (otherName === name) continue;
+          if (typeof otherShape === 'string' && (otherShape === shape.s || otherName === shape.s)) {
+            this.edges.push({ from: nodeMap[otherName], to: transformNode, type: 'source' });
+          }
+        }
+      }
+    }
+  }
+
+  flashStrike(name, ok) {
+    const node = this.nodes.find(n => n.name === name);
+    if (node) {
+      this.strikeFlashes.push({ node, time: 0, ok, maxTime: 70 });
+      for (const edge of this.edges) {
+        if (edge.to === node || edge.from === node) {
+          for (let i = 0; i < 10; i++) {
+            this.edgeParticles.push({
+              edge, t: i / 10, speed: 0.008 + Math.random() * 0.012,
+              life: 1, color: ok ? 'rgba(52,211,153,' : 'rgba(248,113,113,'
+            });
+          }
+        }
+      }
+      const rect = this.canvas.getBoundingClientRect();
+      this.bg.addRipple(rect.left + node.x, rect.top + node.y, ok ? 'rgba(52,211,153,0.3)' : 'rgba(248,113,113,0.3)');
+    }
+  }
+
+  simulate() {
+    const nodes = this.nodes;
+    const repulsion = 3500;
+    const damping = 0.9;
+    const cx = this.W / 2, cy = this.H / 2;
+
+    for (const n of nodes) {
+      if (n.fx !== undefined) { n.x = n.fx; n.y = n.fy; continue; }
+      let fx = 0, fy = 0;
+      for (const m of nodes) {
+        if (m === n) continue;
+        let dx = n.x - m.x, dy = n.y - m.y;
+        const dist = Math.max(Math.sqrt(dx*dx+dy*dy), 1);
+        const force = repulsion / (dist * dist);
+        fx += (dx/dist)*force; fy += (dy/dist)*force;
+      }
+      for (const e of this.edges) {
+        let other = null;
+        if (e.from === n) other = e.to; else if (e.to === n) other = e.from;
+        if (other) {
+          const dx = other.x - n.x, dy = other.y - n.y;
+          const dist = Math.max(Math.sqrt(dx*dx+dy*dy),1);
+          const force = (dist - 130) * 0.0012;
+          fx += (dx/dist)*force; fy += (dy/dist)*force;
+        }
+      }
+      fx += (cx - n.x) * 0.0004; fy += (cy - n.y) * 0.0004;
+      n.vx = (n.vx + fx) * damping; n.vy = (n.vy + fy) * damping;
+      n.x += n.vx; n.y += n.vy;
+      n.x = Math.max(40, Math.min(this.W - 40, n.x));
+      n.y = Math.max(40, Math.min(this.H - 40, n.y));
+    }
+  }
+
+  draw(t) {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.W, this.H);
+    this.simulate();
+
+    // Edges
+    for (const e of this.edges) {
+      if (!e.from || !e.to) continue;
+      ctx.beginPath(); ctx.moveTo(e.from.x, e.from.y); ctx.lineTo(e.to.x, e.to.y);
+      ctx.strokeStyle = 'rgba(123,104,238,0.12)'; ctx.lineWidth = 1; ctx.stroke();
+      // Flow dot
+      const ft = (t * 0.0004) % 1;
+      const fx = e.from.x + (e.to.x - e.from.x) * ft;
+      const fy = e.from.y + (e.to.y - e.from.y) * ft;
+      ctx.beginPath(); ctx.arc(fx, fy, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(123,104,238,0.35)'; ctx.fill();
+    }
+
+    // Edge particles
+    for (let i = this.edgeParticles.length - 1; i >= 0; i--) {
+      const ep = this.edgeParticles[i];
+      ep.t += ep.speed; ep.life -= 0.01;
+      if (ep.life <= 0 || ep.t > 1) { this.edgeParticles.splice(i, 1); continue; }
+      const e = ep.edge; if (!e.from || !e.to) continue;
+      const px = e.from.x + (e.to.x - e.from.x) * ep.t;
+      const py = e.from.y + (e.to.y - e.from.y) * ep.t;
+      ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2);
+      ctx.fillStyle = ep.color + ep.life + ')'; ctx.fill();
+    }
+
+    // Nodes
+    for (const n of this.nodes) {
+      n.phase += 0.012;
+      const pulse = 1 + Math.sin(n.phase) * 0.06;
+      let color, glow;
+      if (n.status === 'presence') { color = '#60a5fa'; glow = 'rgba(96,165,250,0.25)'; }
+      else if (n.status === 'hollow') { color = '#fbbf24'; glow = 'rgba(251,191,36,0.2)'; }
+      else if (n.status === 'complete') { color = '#34d399'; glow = 'rgba(52,211,153,0.25)'; }
+      else { color = '#f87171'; glow = 'rgba(248,113,113,0.25)'; }
+
+      // Outer glow
+      const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.radius * 3.5 * pulse);
+      grad.addColorStop(0, glow); grad.addColorStop(1, 'transparent');
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.radius * 3.5 * pulse, 0, Math.PI * 2);
+      ctx.fillStyle = grad; ctx.fill();
+
+      // Body
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.radius * pulse, 0, Math.PI * 2);
+      if (n.isTransform && n.status === 'hollow') {
+        ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.stroke();
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.radius * 0.35, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(251,191,36,0.25)'; ctx.lineWidth = 1; ctx.stroke();
+      } else {
+        ctx.fillStyle = color; ctx.fill();
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.radius * 0.35 * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fill();
+      }
+
+      // Hover ring
+      if (this.hovered === n) {
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.radius + 8, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+      }
+
+      // Label
+      ctx.fillStyle = n === this.hovered ? '#fff' : 'rgba(200,200,224,0.6)';
+      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      const label = n.name.length > 18 ? n.name.slice(0, 16) + '..' : n.name;
+      ctx.fillText(label, n.x, n.y + n.radius + 18);
+    }
+
+    // Strike flashes
+    for (let i = this.strikeFlashes.length - 1; i >= 0; i--) {
+      const sf = this.strikeFlashes[i]; sf.time++;
+      if (sf.time > sf.maxTime) { this.strikeFlashes.splice(i, 1); continue; }
+      const p = sf.time / sf.maxTime;
+      const r = sf.node.radius + p * 70;
+      ctx.beginPath(); ctx.arc(sf.node.x, sf.node.y, r, 0, Math.PI * 2);
+      ctx.strokeStyle = sf.ok ? `rgba(52,211,153,${(1-p)*0.5})` : `rgba(248,113,113,${(1-p)*0.5})`;
+      ctx.lineWidth = 2.5 * (1 - p); ctx.stroke();
+    }
+  }
+}
+
+
+// ============================================================
+// BLOCH SPHERE
+// ============================================================
+class BlochSphere {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.theta = 0; this.phi = 0;
+    this.targetTheta = 0; this.targetPhi = 0;
+    this.rotY = 0;
+    this.stateLabel = '|0\u27E9';
+  }
+  setState(label) {
+    this.stateLabel = label;
+    if (label.includes('superposition') || (label.includes('|0>') && label.includes('|1>'))) {
+      this.targetTheta = Math.PI / 2; this.targetPhi = 0; this.stateLabel = '|+\u27E9';
+    } else if (label === '|0>' || label === '0') {
+      this.targetTheta = 0; this.targetPhi = 0; this.stateLabel = '|0\u27E9';
+    } else if (label === '|1>' || label === '1') {
+      this.targetTheta = Math.PI; this.targetPhi = 0; this.stateLabel = '|1\u27E9';
+    }
+    document.getElementById('bloch-state').textContent = this.stateLabel;
+  }
+  draw(t) {
+    const ctx = this.ctx;
+    const W = 140, H = 140, cx = W/2, cy = H/2, r = 55;
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width = W * dpr; this.canvas.height = H * dpr;
+    this.canvas.style.width = W + 'px'; this.canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    this.theta += (this.targetTheta - this.theta) * 0.06;
+    this.phi += (this.targetPhi - this.phi) * 0.06;
+    this.rotY += 0.003;
+
+    // Equator
+    ctx.beginPath(); ctx.ellipse(cx, cy, r, r * 0.3, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(123,104,238,0.2)'; ctx.lineWidth = 0.8; ctx.stroke();
+    // Vertical circle
+    ctx.beginPath();
+    for (let a = 0; a <= Math.PI * 2; a += 0.05) {
+      const x = cx + Math.cos(a + this.rotY) * r, y = cy + Math.sin(a) * r;
+      if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = 'rgba(123,104,238,0.1)'; ctx.stroke();
+    // Outer
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(123,104,238,0.22)'; ctx.lineWidth = 1; ctx.stroke();
+    // Z axis
+    ctx.beginPath(); ctx.moveTo(cx, cy - r - 8); ctx.lineTo(cx, cy + r + 8);
+    ctx.strokeStyle = 'rgba(200,200,224,0.12)'; ctx.lineWidth = 0.8; ctx.stroke();
+    // Labels
+    ctx.fillStyle = 'rgba(200,200,224,0.35)';
+    ctx.font = '9px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('|0\u27E9', cx, cy - r - 12); ctx.fillText('|1\u27E9', cx, cy + r + 18);
+    // State vector
+    const sx = cx + Math.sin(this.theta) * Math.cos(this.phi + this.rotY) * r;
+    const sy = cy - Math.cos(this.theta) * r;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(sx, sy);
+    ctx.strokeStyle = 'rgba(167,139,250,0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
+    // State dot glow
+    const sg = ctx.createRadialGradient(sx, sy, 0, sx, sy, 14);
+    sg.addColorStop(0, 'rgba(167,139,250,0.6)'); sg.addColorStop(1, 'transparent');
+    ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI * 2); ctx.fillStyle = sg; ctx.fill();
+    // Dot
+    ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.fillStyle = '#a78bfa'; ctx.fill();
+    ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+  }
+}
+
+
+// ============================================================
+// UI CONTROLLER
+// ============================================================
+const surface = new StrikingSurface();
+const bg = new ParticleBackground(document.getElementById('bg-canvas'));
+const graph = new FlowGraph(document.getElementById('graph-canvas'), surface, bg);
+const bloch = new BlochSphere(document.getElementById('bloch-canvas'));
+
+const editor = document.getElementById('source-editor');
+const consoleOut = document.getElementById('console-output');
+const selectEl = document.getElementById('program-select');
+const progressBar = document.getElementById('progress-bar');
+
+let stepIndex = 0, programLines = [], isRunning = false;
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function loadProgram(name) {
+  editor.value = PROGRAMS[name] || '# Write your own ASF program\n\npresence ground e\n';
+  resetExecution();
+}
+
+function resetExecution() {
+  surface.reset(); surface.listeners = [];
+  consoleOut.innerHTML = '';
+  stepIndex = 0; programLines = editor.value.split('\n');
+  graph.nodes = []; graph.edges = []; graph.edgeParticles = []; graph.strikeFlashes = [];
+  progressBar.style.width = '0%';
+  bloch.setState('|0>');
+  updateStats();
+}
+
+function appendConsole(item) {
+  const div = document.createElement('div');
+  div.className = 'c-line ' + item.cls;
+  div.textContent = item.text;
+  consoleOut.appendChild(div);
+  consoleOut.scrollTop = consoleOut.scrollHeight;
+}
+
+function updateStats() {
+  let shapes = 0, transforms = 0, complete = 0, cut = 0;
+  for (const [, v] of Object.entries(surface.F)) {
+    shapes++;
+    if (typeof v === 'object' && !Array.isArray(v) && 's' in v) {
+      transforms++;
+      if (v.r && v.r.length) { const [ok] = surface.verify(v.s, v.t, v.r); if (ok) complete++; else cut++; }
+    }
+  }
+  document.getElementById('stat-shapes').textContent = shapes;
+  document.getElementById('stat-transforms').textContent = transforms;
+  document.getElementById('stat-complete').textContent = complete;
+  document.getElementById('stat-cut').textContent = cut;
+}
+
+function updateBlochFromState() {
+  for (const [, shape] of Object.entries(surface.F)) {
+    if (typeof shape === 'object' && !Array.isArray(shape) && shape.r && shape.r.length) {
+      const last = shape.r[shape.r.length - 1][1];
+      if (last.includes('|0>') && last.includes('|1>')) bloch.setState(last);
+      else if (last === '|0>' || last === '|1>') bloch.setState(last);
+    }
+  }
+}
+
+async function runAnimated() {
+  if (isRunning) return;
+  isRunning = true;
+  resetExecution();
+  const lines = editor.value.split('\n');
+  const total = lines.length;
+  surface.onEmit(item => appendConsole(item));
+
+  for (let i = 0; i < total; i++) {
+    const line = lines[i].trim();
+    progressBar.style.width = ((i + 1) / total * 100) + '%';
+    const result = surface.execLine(lines[i]);
+
+    if (result && (result.op === 'presence' || result.op === 'transform' || result.op === 'wire')) {
+      graph.buildGraph();
+    }
+    if (result && result.op === 'strike' && result.name) {
+      graph.buildGraph();
+      graph.flashStrike(result.name, result.ok);
+      updateBlochFromState();
+      await sleep(200);
+    }
+    if (line && !line.startsWith('#')) {
+      if (result && result.op === 'disclose') await sleep(50);
+      else if (result && result.op !== 'strike') await sleep(20);
+    }
+    updateStats();
+  }
+  surface.listeners = [];
+  isRunning = false;
+}
+
+function stepOne() {
+  if (isRunning) return;
+  if (stepIndex === 0) {
+    surface.reset(); surface.listeners = [];
+    consoleOut.innerHTML = '';
+    programLines = editor.value.split('\n');
+    surface.onEmit(item => appendConsole(item));
+  }
+  if (stepIndex < programLines.length) {
+    const result = surface.execLine(programLines[stepIndex]);
+    progressBar.style.width = ((stepIndex + 1) / programLines.length * 100) + '%';
+    stepIndex++;
+    graph.buildGraph();
+    if (result && result.op === 'strike' && result.name) graph.flashStrike(result.name, result.ok);
+    updateBlochFromState();
+    updateStats();
+  }
+  if (stepIndex >= programLines.length) surface.listeners = [];
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Animation loop
+function animate(t) { bg.draw(t); graph.draw(t); bloch.draw(t); requestAnimationFrame(animate); }
+
+// Events
+selectEl.addEventListener('change', () => {
+  if (isRunning) return;
+  const val = selectEl.value;
+  if (val === 'custom') { editor.value = '# Write your own ASF program\n\npresence ground e\n\n'; resetExecution(); }
+  else loadProgram(val);
+});
+document.getElementById('btn-run').addEventListener('click', runAnimated);
+document.getElementById('btn-step').addEventListener('click', stepOne);
+document.getElementById('btn-reset').addEventListener('click', resetExecution);
+
+document.addEventListener('keydown', e => {
+  if (e.target === editor) return;
+  if (e.key === 'Enter') { e.preventDefault(); runAnimated(); }
+  else if (e.key === ' ') { e.preventDefault(); stepOne(); }
+  else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetExecution(); }
+});
+
+// Init
+loadProgram('quantum_affordances');
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
