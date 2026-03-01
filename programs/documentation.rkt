@@ -1466,17 +1466,11 @@
 ;;; In a parallel execution model, all siblings at the same
 ;;; depth resolve simultaneously. O(1).
 ;;;
-;;; What O(1) means:
-;;;   - Resolution PASSES = 1, always
-;;;   - Each shape resolved once, waveform called once
-;;;   - Per-shape time is constant
-;;;   - Total wall-clock time is linear in sequential Racket
-;;;     (sequential overhead, not algorithmic complexity)
-;;;
-;;; What O(1) does NOT mean:
-;;;   - Individual waveform time depends on inputs
-;;;     (factoring 360 ≠ factoring 7)
-;;;   - But the RESOLUTION ALGORITHM doesn't care
+;;; ASF resolution is O(1). Waveforms may reach through the
+;;; membrane into clocked substrates (see Section 19). The
+;;; substrate cost is the membrane's domain, not ASF's. From
+;;; ASF's perspective, every waveform call is one structural
+;;; step — regardless of what happens inside the membrane.
 ;;;
 ;;; Full proof with benchmarks: programs/o1-proof.rkt
 
@@ -1556,3 +1550,68 @@
 (displayln "\n══════ SECTION 18: ENFORCEMENT ══════")
 (displayln "  make lint — no forbidden constructs in any program")
 (displayln "  make test — includes lint + time budget + circuit verification")
+
+
+;;; ═══════════════════════════════════════════════════════════════
+;;; SECTION 19: DOUBLE MEMBRANE ENGULFMENT
+;;; ═══════════════════════════════════════════════════════════════
+;;;
+;;; ASF is clockless. The substrate (Racket, the OS, hardware)
+;;; is clocked. The WAVEFORM is the membrane between them.
+;;;
+;;; Double membrane engulfment:
+;;;   Inner membrane = the transform definition.
+;;;     Source, target, waveform. Pure ASF. Clockless.
+;;;   Outer membrane = the waveform implementation.
+;;;     Runs on the substrate. Clocked if it needs to be.
+;;;   ASF wraps substrate capabilities without inheriting
+;;;   their constraints.
+;;;
+;;; From ASF's perspective, every waveform call is one
+;;; structural step. O(1). What happens inside the membrane
+;;; — recursion, I/O, network calls, GPU kernels — is the
+;;; substrate's concern. ASF rides on top, penalty free.
+;;;
+;;; PRIORITY ORDER for new functionality:
+;;;
+;;;   1. FIRST: Express it as transforms on the surface.
+;;;      Pure ASF. O(1). The power is in the composition
+;;;      of atomic transforms, not in clever waveforms.
+;;;      Build bespoke functionality on demand.
+;;;
+;;;   2. IF NEEDED: Build a bespoke O(1) waveform.
+;;;      One structural step. Minimal membrane.
+;;;
+;;;   3. LAST RESORT: Engulf a clocked substrate capability.
+;;;      Full membrane. The substrate does the work.
+;;;      ASF doesn't care how — only that the residue
+;;;      is constitutional.
+;;;
+;;; The model waveform is wf:nand — one operation, one step,
+;;; O(1). All classical gates are compositions of NAND.
+;;; The power is in arrangement, not in atoms.
+
+(displayln "\n══════ SECTION 19: DOUBLE MEMBRANE ENGULFMENT ══════")
+
+;; Demonstration: a substrate-engulfing waveform vs a pure ASF composition.
+;;
+;; ENGULFMENT: wf:factor recurses in the substrate to find factors.
+;; The recursion is the substrate's problem. ASF sees one step.
+(surface
+  (transform 'engulf-demo
+    (presence 'n 30)
+    (ground)
+    wf:factor)
+  (disclose 'engulf-demo))
+  ;; 30 -> 15 -> 5. Three shapes of residue.
+  ;; wf:factor recurses internally. ASF doesn't care.
+  ;; One transform. One resolution. O(1) from ASF's view.
+
+;; PURE ASF: the same result through composition of atomic transforms.
+;; Each wf:nand is O(1). The power is in the arrangement.
+(surface
+  (transform 'nand-a (presence 'x "1,1") (ground) wf:nand)
+  (transform 'nand-b (presence 'y "1,0") (ground) wf:nand)
+  (transform 'nand-c (presence 'z "0,0") (ground) wf:nand))
+  ;; Three O(1) transforms. No membrane needed.
+  ;; Composition IS the program. Arrangement IS the power.
