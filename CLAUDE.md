@@ -1,50 +1,25 @@
 # Striking Surface — Clockless Atomic State Flow
 
-## What This Is
+Programs are Dyck words. Shape IS computation. Strike = complete this circuit.
 
-A computation model where programs are Dyck words (balanced parentheses).
-The shape IS the computation. No clock, no loops, no iteration, no mutation.
-Strike = complete this circuit.
+## Structure
 
-## Two Machines
+- `strike.rkt` — the machine. No loops, no clock, no mutation.
+- `programs/` — programs that run on the machine.
+- `archive/` — earlier layers (Python interpreter, HTML GUI). Git history has full provenance.
 
-### Racket Machine (clockless)
-- `strike.rkt` — the clockless striking surface
-- `programs/*.rkt` — clockless programs (S-expressions)
-- No `for`, `while`, `do`, `set!` — structural `match` dispatch only
-- All waveforms are pure functions: `(string, string) -> (listof (cons string string))`
-- Run: `racket programs/documentation.rkt`
+## Run
 
-### Python Machine (original)
-- `strike.py` — the original interpreter
-- `programs/*.asf` — ASF-format programs
-- `waveforms/*.py` — external waveform processes (14 total)
-- Run: `python3 strike.py programs/quantum_affordances.asf`
-
-### HTML GUI
-- `quantum_affordances.html` — self-contained browser interface (JS port of both machines)
-
-## Key Concepts
-
-- **Flownodes** have three sides: outside (interface), inside (hollow or consolidated), metaside (volunteered metadata — names, hierarchical ordering index, indicators, indicator chains)
-- **Constitution**: chain, grounded, complete, balanced, minimal — properties of shape, not checks
-- **Waveforms**: structural intelligence. Shape in, residue out. ONE source of non-determinism: `wf:collapse`
-- **Labels**: human readability, not computation. Labels name compositions.
-- **Continuations**: new transforms registered onto existing machine, instantaneously transformative
-
-## Documentation
-
-The complete documentation is `programs/documentation.rkt`. It IS executable.
-Every claim is backed by a working example. Run it:
-
-```
-racket programs/documentation.rkt
+```sh
+racket programs/documentation.rkt   # complete docs + working examples
+racket programs/quantum-affordances.rkt   # the quantum affordances
+make test   # verify all circuits complete
 ```
 
-## Rules for Contributing
+## Rules
 
-- Do not add interpretations beyond what the codebase establishes
-- The Racket machine must remain clockless: no `for`, `while`, `do`, `set!`
-- Every new waveform must be a pure function (except `wf:collapse`)
-- Every new example must pass all five constitution checks
+- No `for`, `while`, `do`, `set!` in the Racket machine
+- Every waveform is pure (except `wf:collapse`)
+- Every example must pass constitution: chain, grounded, complete, balanced, minimal
 - Documentation is executable — if it doesn't run, it's wrong
+- Do not add interpretations beyond what the codebase establishes
