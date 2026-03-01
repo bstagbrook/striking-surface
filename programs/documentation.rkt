@@ -1448,3 +1448,111 @@
 (surface)
   ;; Governance with nothing to govern = the empty surface.
   ;; Valid. Ready. Waiting for the transform to be defined.
+
+
+;;; ═══════════════════════════════════════════════════════════════
+;;; SECTION 16: O(1) STRUCTURAL RESOLUTION
+;;; ═══════════════════════════════════════════════════════════════
+;;;
+;;; The machine makes ONE structural pass through all shapes.
+;;; Each shape is resolved EXACTLY ONCE. No iteration. No
+;;; re-processing. No convergence loops.
+;;;
+;;; Resolution depth = nesting depth of the Dyck word, not the
+;;; number of shapes. Adding more shapes to the breadboard does
+;;; not add resolution passes. A surface with 10 shapes and a
+;;; surface with 10,000 shapes both resolve in one pass.
+;;;
+;;; In a parallel execution model, all siblings at the same
+;;; depth resolve simultaneously. O(1).
+;;;
+;;; What O(1) means:
+;;;   - Resolution PASSES = 1, always
+;;;   - Each shape resolved once, waveform called once
+;;;   - Per-shape time is constant
+;;;   - Total wall-clock time is linear in sequential Racket
+;;;     (sequential overhead, not algorithmic complexity)
+;;;
+;;; What O(1) does NOT mean:
+;;;   - Individual waveform time depends on inputs
+;;;     (factoring 360 ≠ factoring 7)
+;;;   - But the RESOLUTION ALGORITHM doesn't care
+;;;
+;;; Full proof with benchmarks: programs/o1-proof.rkt
+
+(displayln "\n══════ SECTION 16: O(1) RESOLUTION ══════")
+
+;; Demonstration: two transforms at the same depth.
+;; Both resolve in one pass. Neither waits for the other.
+(surface
+  (transform 'resolve-once-a (presence 'ra "1,0") (ground) wf:nand)
+  (transform 'resolve-once-b (presence 'rb "0,1") (ground) wf:nand)
+  (disclose 'resolve-once-a)
+  (disclose 'resolve-once-b))
+  ;; Two shapes. One pass. O(1).
+
+
+;;; ═══════════════════════════════════════════════════════════════
+;;; SECTION 17: PAN-MEDIA — FUNCTIONALITY ON DEMAND
+;;; ═══════════════════════════════════════════════════════════════
+;;;
+;;; The surface doesn't care what the waveform does.
+;;; It cares that the residue is constitutional.
+;;; Register a waveform for any media type — text, numeric,
+;;; structural, binary, quantum — the surface resolves it
+;;; the same way.
+;;;
+;;; Pan-media = register waveforms on demand.
+;;; Functionality on demand = registration of new transforms.
+;;; This IS continuations. One concept, two labels.
+;;;
+;;; The surface IS already a pan-media machine. It always was.
+;;; You don't build pan-media capability. You register it.
+;;;
+;;; Full demonstration with 7 media types: programs/pan-media.rkt
+
+(displayln "\n══════ SECTION 17: PAN-MEDIA ══════")
+
+;; A custom waveform for a new media type: text reversal.
+;; Register it. Use it. The surface doesn't care.
+(define (wf:reverse-text source target)
+  (let* ([s (->str source)]
+         [rev (list->string (reverse (string->list s)))])
+    (list (cons s rev)
+          (cons rev "e"))))
+
+(surface
+  (transform 'reverse-demo
+    (presence 'msg "hello")
+    (ground)
+    wf:reverse-text)
+  (disclose 'reverse-demo))
+  ;; "hello" -> "olleh". Constitutional. Complete.
+  ;; One registration. One new media capability.
+
+
+;;; ═══════════════════════════════════════════════════════════════
+;;; SECTION 18: ENFORCEMENT
+;;; ═══════════════════════════════════════════════════════════════
+;;;
+;;; The Makefile enforces two properties on all programs:
+;;;
+;;;   1. STATIC LINT — no forbidden constructs.
+;;;      Scans for: for, while, do, set!
+;;;      If found: FAIL. Iteration or mutation detected.
+;;;
+;;;   2. TIME BUDGET — every program must complete within
+;;;      a fixed time limit (30 seconds).
+;;;      If exceeded: FAIL. The circuit took too long.
+;;;
+;;; These are constitution checks on the WORKFLOW.
+;;; The Makefile is the striking surface for the process.
+;;; A program that iterates is a CUT.
+;;; A program that times out is a CUT.
+;;;
+;;; Run: make test (includes lint automatically)
+;;; Run: make lint (static analysis only)
+
+(displayln "\n══════ SECTION 18: ENFORCEMENT ══════")
+(displayln "  make lint — no forbidden constructs in any program")
+(displayln "  make test — includes lint + time budget + circuit verification")
