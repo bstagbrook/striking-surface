@@ -1,0 +1,656 @@
+<!DOCTYPE html><script>
+// The striking surface. The browser is a portal. HTML is a shape passed through.
+// ASF is the computation. JavaScript substrates it.
+
+// ============================================================
+// THE FLOWSPACE
+// ============================================================
+
+const F = {}; // label to shape
+
+// ============================================================
+// DYCK WORD BALANCE CHECK
+// ============================================================
+
+function balanced(s) {
+  let d = 0;
+  for (const c of String(s)) {
+    if (c === '(') d++;
+    else if (c === ')') d--;
+    if (d < 0) return false;
+  }
+  return d === 0;
+}
+
+// ============================================================
+// VERIFICATION — the grounded frame
+// ============================================================
+
+function verify(source, target, residue) {
+  if (!residue.length) {
+    if (String(target) === 'ground' || String(target) === 'e' || String(source) === String(target)) {
+      return [true, 'at ground'];
+    }
+    return [false, 'empty'];
+  }
+  const chain = residue.every((r, i) =>
+    i === residue.length - 1 || r[1] === residue[i + 1][0]
+  );
+  const grounded = residue[0][0] === String(source);
+  const complete = residue[residue.length - 1][1] === String(target) ||
+    String(target) === 'ground' || String(target) === 'e';
+  const bal = residue.every(r => r[0] !== r[1]);
+  const sources = new Set(residue.map(r => r[0]));
+  const minimal = sources.size === residue.length;
+  const ok = chain && grounded && complete && bal && minimal;
+  const s = `chain${chain ? '✓' : '✗'} grounded${grounded ? '✓' : '✗'} complete${complete ? '✓' : '✗'} balanced${bal ? '✓' : '✗'} minimal${minimal ? '✓' : '✗'}`;
+  return [ok, s];
+}
+
+// ============================================================
+// EMIT — shapes pass through to HTML
+// ============================================================
+
+let outputEl = null;
+
+function emit(s) {
+  if (!outputEl) return;
+  const line = document.createElement('div');
+  line.textContent = s;
+  outputEl.appendChild(line);
+  outputEl.scrollTop = outputEl.scrollHeight;
+}
+
+// ============================================================
+// WAVEFORMS — the physics
+// ============================================================
+
+const SQRT2 = 1 / Math.sqrt(2);
+const S4 = SQRT2.toFixed(4);
+
+const waveforms = {
+  superpose(source, target) {
+    if (source === '0' || source === '|0>') {
+      return `${source} -> ${S4}|0>+${S4}|1>`;
+    } else if (source === '1' || source === '|1>') {
+      return `${source} -> ${S4}|0>-${S4}|1>`;
+    } else {
+      return `${source} -> superposition(${source})`;
+    }
+  },
+
+  collapse(source, target) {
+    if (source.includes('|0>') && source.includes('|1>')) {
+      const parts = source.replace(/\+/g, ' ').replace(/-/g, ' -').split(/\s+/).filter(Boolean);
+      let amp0 = 0, amp1 = 0;
+      for (const p of parts) {
+        if (p.includes('|0>')) amp0 = parseFloat(p.replace('|0>', ''));
+        else if (p.includes('|1>')) amp1 = parseFloat(p.replace('|1>', ''));
+      }
+      const prob0 = amp0 * amp0;
+      const outcome = Math.random() < prob0 ? '|0>' : '|1>';
+      return `${source} -> ${outcome}`;
+    } else {
+      return `${source} -> ${source}`;
+    }
+  },
+
+  entangle(source, target) {
+    const a = source;
+    const b = target || '0';
+    if ((a === '0' || a === '|0>') && (b === '0' || b === '|0>' || b === 'ground' || b === 'e')) {
+      return `${a} -> H(${a})x${b}\nH(${a})x${b} -> ${S4}|00>+${S4}|11>`;
+    } else {
+      return `${a} -> bell(${a},${b})`;
+    }
+  },
+
+  interfere(source, target) {
+    if (source === 'constructive') {
+      return `constructive -> ${S4}|x>+${S4}|x>\n${S4}|x>+${S4}|x> -> 1.0000|x>`;
+    } else if (source === 'destructive') {
+      return `destructive -> ${S4}|x>-${S4}|x>\n${S4}|x>-${S4}|x> -> 0.0000|x>`;
+    } else if (source === 'HH') {
+      return `HH -> ${S4}|0>+${S4}|1>\n${S4}|0>+${S4}|1> -> |0>`;
+    } else {
+      return `${source} -> interfere(${source})`;
+    }
+  },
+
+  teleport(source, target) {
+    return [
+      `${source} -> bell_pair+${source}`,
+      `bell_pair+${source} -> alice_measures`,
+      `alice_measures -> classical_bits(2)`,
+      `classical_bits(2) -> bob_corrects`,
+      `bob_corrects -> bob(${source})`
+    ].join('\n');
+  },
+
+  nand(source, target) {
+    const bits = source.split(',');
+    const a = parseInt(bits[0]), b = parseInt(bits[1]);
+    const result = (a && b) ? 0 : 1;
+    return `${source} -> ${result}`;
+  },
+
+  ring(source, target) {
+    const n = (target && /^\d+$/.test(target)) ? parseInt(target) : 3;
+    const cycle = ['be', 'have', 'do'];
+    let current = source;
+    const lines = [];
+    for (let i = 0; i < n; i++) {
+      const idx = cycle.indexOf(current) >= 0 ? cycle.indexOf(current) : 0;
+      const nxt = cycle[(idx + 1) % cycle.length];
+      lines.push(`${current} -> ${nxt}`);
+      current = nxt;
+    }
+    return lines.join('\n');
+  }
+};
+
+// Map of wire names to waveform functions
+// In the Python version, wire stores "python3 waveforms/superpose.py"
+// Here we store the function reference. The ASF parser maps known wire paths.
+const WIRE_MAP = {
+  'python3 waveforms/superpose.py': waveforms.superpose,
+  'python3 waveforms/collapse.py': waveforms.collapse,
+  'python3 waveforms/entangle.py': waveforms.entangle,
+  'python3 waveforms/interfere.py': waveforms.interfere,
+  'python3 waveforms/teleport.py': waveforms.teleport,
+  'python3 waveforms/nand.py': waveforms.nand,
+  'python3 waveforms/ring.py': waveforms.ring,
+  // Direct names (for the JS surface)
+  'superpose': waveforms.superpose,
+  'collapse': waveforms.collapse,
+  'entangle': waveforms.entangle,
+  'interfere': waveforms.interfere,
+  'teleport': waveforms.teleport,
+  'nand': waveforms.nand,
+  'ring': waveforms.ring,
+};
+
+// ============================================================
+// THE ASF INTERPRETER — faithful port of strike.py
+// ============================================================
+
+function executeASF(text) {
+  const lines = text.split('\n');
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+
+    const parts = line.split(/\s+/);
+    const op = parts[0];
+
+    if (op === 'presence') {
+      // presence <label> [<value>]
+      const label = parts[1];
+      const rest = line.split(/\s+/).slice(2).join(' ');
+      F[label] = rest || '()';
+      emit(`  (${label})`);
+    }
+
+    else if (op === 'contain') {
+      // contain <outer> <inner>
+      const o = parts[1], i = parts[2];
+      let cur = F[o] !== undefined ? F[o] : [];
+      if (!Array.isArray(cur)) cur = [cur];
+      cur.push(F[i] !== undefined ? F[i] : i);
+      F[o] = cur;
+      emit(`  ((${i}) in (${o}))`);
+    }
+
+    else if (op === 'label') {
+      // label <original> <alias>
+      F[parts[2]] = F[parts[1]] !== undefined ? F[parts[1]] : parts[1];
+      emit(`  e:${parts[2]} -> (${parts[1]})`);
+    }
+
+    else if (op === 'transform') {
+      // transform <label> <source> <target>
+      const p = line.split(/\s+/);
+      // resolve source: if it names a completed transform, use its residue's final value
+      let src = F[p[2]] !== undefined ? F[p[2]] : p[2];
+      if (src && typeof src === 'object' && !Array.isArray(src) && src.r && src.r.length) {
+        src = src.r[src.r.length - 1][1];
+      }
+      let tgt = F[p[3]] !== undefined ? F[p[3]] : p[3];
+      if (tgt && typeof tgt === 'object' && !Array.isArray(tgt) && tgt.r && tgt.r.length) {
+        tgt = tgt.r[tgt.r.length - 1][1];
+      }
+      F[p[1]] = { s: src, t: tgt, w: null, r: [] };
+      emit(`  (${p[1]}): (${p[2]}) -> (${p[3]}) (())`);
+    }
+
+    else if (op === 'wire') {
+      // wire <label> <command...>
+      const p = line.split(/\s+/);
+      const label = p[1];
+      const cmd = p.slice(2).join(' ');
+      if (label in F && typeof F[label] === 'object' && !Array.isArray(F[label])) {
+        F[label].w = cmd;
+        emit(`  (${label}) ~ ${cmd}`);
+      }
+    }
+
+    else if (op === 'strike') {
+      const label = parts[1];
+      const t = F[label];
+      if (t && typeof t === 'object' && !Array.isArray(t) && t.w) {
+        // Resolve the waveform function
+        const wfn = WIRE_MAP[t.w];
+        let rawOutput = '';
+        if (wfn) {
+          rawOutput = wfn(String(t.s), String(t.t));
+        } else {
+          emit(`  unknown waveform: ${t.w}`);
+          continue;
+        }
+        const residue = [];
+        for (const rl of rawOutput.split('\n')) {
+          if (rl.includes('->')) {
+            const [a, b] = rl.split('->', 2);
+            residue.push([a.trim(), b.trim()]);
+          }
+        }
+        t.r = residue;
+        const [ok, status] = verify(t.s, t.t, residue);
+        emit(`  strike ${label}: ${residue.length} shapes`);
+        emit(`  ${status}`);
+        if (ok) {
+          emit(`  )  complete.`);
+        } else {
+          emit(`  CUT`);
+        }
+      }
+    }
+
+    else if (op === 'recognize') {
+      emit(`  ${parts[1] in F ? 'recognized' : 'absent'}: (${parts[1]})`);
+    }
+
+    else if (op === 'disclose') {
+      const label = parts[1];
+      const shape = F[label];
+      if (shape === undefined) {
+        emit(`  absent`);
+      } else if (shape && typeof shape === 'object' && !Array.isArray(shape) && 's' in shape) {
+        emit(`  META: ${label}`);
+        emit(`  OUTSIDE: (${shape.s}) -> (${shape.t}) [${shape.r.length} shapes]`);
+        for (const r of shape.r) {
+          emit(`    ${r[0]} -> ${r[1]}`);
+        }
+      } else {
+        emit(`  (${label}) = ${shape}`);
+      }
+    }
+  }
+  updateInspector();
+}
+
+// ============================================================
+// PRESET ASF PROGRAMS
+// ============================================================
+
+const PRESETS = {
+  'quantum_affordances': `# Quantum Affordances
+# Each affordance is a shape. Each shape conducts.
+# One waveform per affordance. One striking surface.
+
+presence ground e
+
+# SUPERPOSITION
+presence qubit_zero 0
+transform superpose qubit_zero ground
+wire superpose python3 waveforms/superpose.py
+strike superpose
+disclose superpose
+
+# COLLAPSE
+presence superposed 0.7071|0>+0.7071|1>
+transform measure superposed ground
+wire measure python3 waveforms/collapse.py
+strike measure
+disclose measure
+
+# ENTANGLEMENT
+presence alice_qubit 0
+presence bob_qubit 0
+transform bell_pair alice_qubit ground
+wire bell_pair python3 waveforms/entangle.py
+strike bell_pair
+disclose bell_pair
+
+# INTERFERENCE
+presence path_constructive constructive
+presence path_destructive destructive
+presence path_HH HH
+
+transform reinforce path_constructive ground
+transform cancel path_destructive ground
+transform identity path_HH ground
+
+wire reinforce python3 waveforms/interfere.py
+wire cancel python3 waveforms/interfere.py
+wire identity python3 waveforms/interfere.py
+
+strike reinforce
+strike cancel
+strike identity
+
+disclose reinforce
+disclose cancel
+disclose identity
+
+# RING
+presence being be
+transform lifecycle being ground
+wire lifecycle python3 waveforms/ring.py
+strike lifecycle
+disclose lifecycle
+
+# TELEPORTATION
+presence alice_state secret_quantum_state
+transform teleport alice_state ground
+wire teleport python3 waveforms/teleport.py
+strike teleport
+disclose teleport
+
+# NAND
+presence bits_11 1,1
+transform nand bits_11 ground
+wire nand python3 waveforms/nand.py
+strike nand
+disclose nand`,
+
+  'gates': `# Logic gates from NAND.
+# NAND is the only waveform. Everything else is a shape.
+
+presence ground e
+
+# NAND truth table
+presence both_true 1,1
+presence one_true 1,0
+presence other_true 0,1
+presence both_false 0,0
+
+transform nand_11 both_true ground
+transform nand_10 one_true ground
+transform nand_01 other_true ground
+transform nand_00 both_false ground
+
+wire nand_11 python3 waveforms/nand.py
+wire nand_10 python3 waveforms/nand.py
+wire nand_01 python3 waveforms/nand.py
+wire nand_00 python3 waveforms/nand.py
+
+strike nand_11
+strike nand_10
+strike nand_01
+strike nand_00
+
+disclose nand_11
+disclose nand_10
+disclose nand_01
+disclose nand_00
+
+# NOT = NAND(A,A)
+presence one_one 1,1
+presence zero_zero 0,0
+
+transform not_1 one_one ground
+transform not_0 zero_zero ground
+
+wire not_1 python3 waveforms/nand.py
+wire not_0 python3 waveforms/nand.py
+
+strike not_1
+strike not_0
+
+disclose not_1
+disclose not_0
+
+# AND(1,1): NAND(1,1)=0, then NAND(0,0)=1
+presence and_11_mid 0,0
+transform and_11 and_11_mid ground
+wire and_11 python3 waveforms/nand.py
+strike and_11
+disclose and_11
+
+# AND(1,0): NAND(1,0)=1, then NAND(1,1)=0
+presence and_10_mid 1,1
+transform and_10 and_10_mid ground
+wire and_10 python3 waveforms/nand.py
+strike and_10
+disclose and_10
+
+# OR(1,0): NOT(1)=0, NOT(0)=1, NAND(0,1)=1
+presence or_10_mid 0,1
+transform or_10 or_10_mid ground
+wire or_10 python3 waveforms/nand.py
+strike or_10
+disclose or_10
+
+# OR(0,0): NOT(0)=1, NOT(0)=1, NAND(1,1)=0
+presence or_00_mid 1,1
+transform or_00 or_00_mid ground
+wire or_00 python3 waveforms/nand.py
+strike or_00
+disclose or_00`,
+
+  'one_qubit': `# One qubit. Three affordances. Full computation.
+# This is a complete quantum computation in ASF.
+
+presence ground e
+presence q 0
+
+# Step 1: Superpose
+transform step1 q ground
+wire step1 superpose
+strike step1
+disclose step1
+
+# Step 2: Entangle (previous residue endpoint becomes source)
+transform step2 step1 ground
+wire step2 entangle
+strike step2
+disclose step2
+
+# Step 3: Collapse (measure)
+transform step3 step2 ground
+wire step3 collapse
+strike step3
+disclose step3`
+};
+
+// ============================================================
+// THE SURFACE — shapes pass through HTML
+// ============================================================
+
+function buildSurface() {
+  // The surface itself is built through the engine's affordances,
+  // but we bootstrap with direct DOM to create the initial portal shapes.
+
+  document.title = 'The Striking Surface';
+
+  const style = document.createElement('style');
+  style.textContent = `
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #c0c0c0; font-family: monospace; font-size: 13px; }
+    #surface { display: flex; height: 100vh; }
+    #left { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #333; }
+    #right { width: 320px; display: flex; flex-direction: column; }
+    #output { flex: 1; overflow-y: auto; padding: 8px; white-space: pre-wrap; word-break: break-all; line-height: 1.4; }
+    #output div { margin-bottom: 1px; }
+    #input-area { border-top: 1px solid #333; padding: 8px; }
+    #console { width: 100%; height: 120px; background: #111; color: #e0e0e0; border: 1px solid #333;
+      font-family: monospace; font-size: 13px; padding: 6px; resize: vertical; }
+    #controls { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+    button { background: #1a1a1a; color: #aaa; border: 1px solid #333; padding: 4px 10px;
+      font-family: monospace; font-size: 12px; cursor: pointer; }
+    button:hover { background: #252525; color: #ddd; }
+    #inspector { flex: 1; overflow-y: auto; padding: 8px; border-top: 1px solid #333; }
+    #inspector-title { color: #777; margin-bottom: 6px; }
+    .shape-entry { margin-bottom: 4px; color: #888; }
+    .shape-label { color: #9a9; }
+    .shape-value { color: #99a; }
+    .shape-transform { color: #a99; }
+    .verified { color: #6a6; }
+    .cut { color: #a66; }
+  `;
+  document.head.appendChild(style);
+
+  const surface = document.createElement('div');
+  surface.id = 'surface';
+  document.body.appendChild(surface);
+
+  // Left panel: output + console
+  const left = document.createElement('div');
+  left.id = 'left';
+  surface.appendChild(left);
+
+  outputEl = document.createElement('div');
+  outputEl.id = 'output';
+  left.appendChild(outputEl);
+
+  const inputArea = document.createElement('div');
+  inputArea.id = 'input-area';
+  left.appendChild(inputArea);
+
+  const consoleEl = document.createElement('textarea');
+  consoleEl.id = 'console';
+  consoleEl.placeholder = 'Type ASF commands here...\npresence q 0\ntransform step1 q ground\nwire step1 superpose\nstrike step1\ndisclose step1';
+  inputArea.appendChild(consoleEl);
+
+  const controls = document.createElement('div');
+  controls.id = 'controls';
+  inputArea.appendChild(controls);
+
+  // Strike button
+  const strikeBtn = document.createElement('button');
+  strikeBtn.textContent = 'strike';
+  strikeBtn.onclick = () => {
+    const text = consoleEl.value;
+    if (text.trim()) {
+      emit('--- strike ---');
+      executeASF(text);
+      consoleEl.value = '';
+    }
+  };
+  controls.appendChild(strikeBtn);
+
+  // Clear flowspace
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = 'clear';
+  clearBtn.onclick = () => {
+    Object.keys(F).forEach(k => delete F[k]);
+    outputEl.innerHTML = '';
+    updateInspector();
+  };
+  controls.appendChild(clearBtn);
+
+  // Preset buttons
+  for (const name of Object.keys(PRESETS)) {
+    const btn = document.createElement('button');
+    btn.textContent = name;
+    btn.onclick = () => {
+      Object.keys(F).forEach(k => delete F[k]);
+      outputEl.innerHTML = '';
+      emit(`--- ${name} ---`);
+      executeASF(PRESETS[name]);
+    };
+    controls.appendChild(btn);
+  }
+
+  // Ctrl+Enter to strike
+  consoleEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      strikeBtn.click();
+    }
+  });
+
+  // Right panel: flowspace inspector
+  const right = document.createElement('div');
+  right.id = 'right';
+  surface.appendChild(right);
+
+  const inspectorTitle = document.createElement('div');
+  inspectorTitle.id = 'inspector-title';
+  inspectorTitle.textContent = 'FLOWSPACE (F)';
+  right.appendChild(inspectorTitle);
+
+  const inspector = document.createElement('div');
+  inspector.id = 'inspector';
+  right.appendChild(inspector);
+}
+
+function updateInspector() {
+  const inspector = document.getElementById('inspector');
+  if (!inspector) return;
+  inspector.innerHTML = '';
+
+  for (const [label, shape] of Object.entries(F)) {
+    const entry = document.createElement('div');
+    entry.className = 'shape-entry';
+
+    if (shape && typeof shape === 'object' && !Array.isArray(shape) && 's' in shape) {
+      // Transform
+      const ok = shape.r.length > 0;
+      const lbl = document.createElement('span');
+      lbl.className = 'shape-transform';
+      lbl.textContent = `${label}: `;
+      entry.appendChild(lbl);
+
+      const val = document.createElement('span');
+      val.textContent = `(${shape.s}) -> (${shape.t})`;
+      entry.appendChild(val);
+
+      if (shape.r.length > 0) {
+        const res = document.createElement('div');
+        res.style.paddingLeft = '12px';
+        res.style.fontSize = '11px';
+        for (const r of shape.r) {
+          const rline = document.createElement('div');
+          rline.className = 'verified';
+          rline.textContent = `${r[0]} -> ${r[1]}`;
+          res.appendChild(rline);
+        }
+        entry.appendChild(res);
+      }
+      if (shape.w) {
+        const wire = document.createElement('div');
+        wire.style.paddingLeft = '12px';
+        wire.style.fontSize = '11px';
+        wire.style.color = '#666';
+        wire.textContent = `~ ${shape.w}`;
+        entry.appendChild(wire);
+      }
+    } else {
+      // Simple shape
+      const lbl = document.createElement('span');
+      lbl.className = 'shape-label';
+      lbl.textContent = `${label}`;
+      entry.appendChild(lbl);
+
+      const eq = document.createElement('span');
+      eq.textContent = ' = ';
+      entry.appendChild(eq);
+
+      const val = document.createElement('span');
+      val.className = 'shape-value';
+      val.textContent = Array.isArray(shape) ? `[${shape.join(', ')}]` : String(shape);
+      entry.appendChild(val);
+    }
+
+    inspector.appendChild(entry);
+  }
+}
+
+// ============================================================
+// BOOTSTRAP — pass through the portal
+// ============================================================
+
+buildSurface();
+</script>
