@@ -545,6 +545,38 @@ function buildSurface() {
     .shape-transform { color: #a99; }
     .verified { color: #6a6; }
     .cut { color: #a66; }
+    #tabs { display: flex; border-bottom: 1px solid #333; }
+    .tab { padding: ${isNarrow ? '10px 14px' : '6px 12px'}; cursor: pointer; color: #666;
+      border-bottom: 2px solid transparent; font-family: monospace;
+      font-size: ${isNarrow ? '14px' : '12px'}; touch-action: manipulation; }
+    .tab.active { color: #aaa; border-bottom-color: #666; }
+    .tab-content { display: none; flex-direction: column; flex: 1; min-height: 0; }
+    .tab-content.active { display: flex; }
+    #composer { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    #affordance-bar { display: flex; gap: 4px; padding: 8px; flex-wrap: wrap;
+      border-bottom: 1px solid #222; }
+    .aff-btn { background: #111; color: #8a8; border: 1px solid #2a3a2a;
+      padding: ${isNarrow ? '10px 14px' : '6px 12px'};
+      font-family: monospace; font-size: ${isNarrow ? '14px' : '12px'};
+      cursor: pointer; touch-action: manipulation; }
+    .aff-btn:hover { background: #1a2a1a; color: #aca; }
+    .aff-btn:active { background: #2a3a2a; color: #cec; }
+    #flow-view { flex: 1; overflow-y: auto; padding: 8px; min-height: 0;
+      -webkit-overflow-scrolling: touch; }
+    .flow-step { display: flex; align-items: center; margin-bottom: 6px; }
+    .flow-shape { background: #151515; border: 1px solid #333; padding: 4px 8px;
+      color: #99a; font-size: ${isNarrow ? '13px' : '11px'}; max-width: 100%;
+      word-break: break-all; }
+    .flow-arrow { color: #555; margin: 0 6px; flex-shrink: 0; }
+    .flow-affordance { color: #8a8; font-size: ${isNarrow ? '13px' : '11px'}; flex-shrink: 0; }
+    .flow-status { font-size: 10px; margin-left: 6px; }
+    .flow-status.ok { color: #6a6; }
+    .flow-status.fail { color: #a66; }
+    #compose-controls { padding: 8px; border-top: 1px solid #222; display: flex; gap: 4px;
+      flex-wrap: wrap; align-items: center; }
+    #compose-name { background: #111; color: #e0e0e0; border: 1px solid #333;
+      font-family: monospace; font-size: ${isNarrow ? '14px' : '12px'};
+      padding: 4px 8px; flex: 1; min-width: 80px; -webkit-appearance: none; border-radius: 0; }
     @media (max-width: 699px) {
       #surface { flex-direction: column; }
       #left { border-right: none; }
@@ -557,18 +589,211 @@ function buildSurface() {
   surface.id = 'surface';
   document.body.appendChild(surface);
 
-  // Left panel: output + console
+  // Left panel: tabs (composer + console)
   const left = document.createElement('div');
   left.id = 'left';
   surface.appendChild(left);
 
+  // Tab bar
+  const tabs = document.createElement('div');
+  tabs.id = 'tabs';
+  left.appendChild(tabs);
+
+  const tabComposer = document.createElement('div');
+  tabComposer.className = 'tab active';
+  tabComposer.textContent = 'compose';
+  tabs.appendChild(tabComposer);
+
+  const tabConsole = document.createElement('div');
+  tabConsole.className = 'tab';
+  tabConsole.textContent = 'console';
+  tabs.appendChild(tabConsole);
+
+  // ---- COMPOSER TAB ----
+  const composerContent = document.createElement('div');
+  composerContent.className = 'tab-content active';
+  left.appendChild(composerContent);
+
+  // Affordance palette
+  const affBar = document.createElement('div');
+  affBar.id = 'affordance-bar';
+  composerContent.appendChild(affBar);
+
+  const AFFORDANCE_LIST = ['superpose', 'collapse', 'entangle', 'interfere', 'teleport', 'nand', 'ring'];
+
+  let composeStepCount = 0;
+
+  function applyAffordance(name) {
+    // Find the last transform in the flowspace (for chaining)
+    let lastTransformLabel = null;
+    for (const [label, shape] of Object.entries(F)) {
+      if (shape && typeof shape === 'object' && !Array.isArray(shape) && 's' in shape && shape.r && shape.r.length > 0) {
+        lastTransformLabel = label;
+      }
+    }
+
+    composeStepCount++;
+    const stepLabel = `step${composeStepCount}`;
+
+    if (!lastTransformLabel) {
+      // No prior transform — create initial shape
+      if (!F['ground']) {
+        executeASF('presence ground e');
+      }
+      if (!F['q']) {
+        if (name === 'nand') {
+          executeASF('presence q 1,1');
+        } else if (name === 'ring') {
+          executeASF('presence q be');
+        } else {
+          executeASF('presence q 0');
+        }
+      }
+      executeASF(`transform ${stepLabel} q ground\nwire ${stepLabel} ${name}\nstrike ${stepLabel}`);
+    } else {
+      // Chain from last transform
+      executeASF(`transform ${stepLabel} ${lastTransformLabel} ground\nwire ${stepLabel} ${name}\nstrike ${stepLabel}`);
+    }
+    updateFlowView();
+  }
+
+  for (const name of AFFORDANCE_LIST) {
+    const btn = document.createElement('button');
+    btn.className = 'aff-btn';
+    btn.textContent = name;
+    btn.onclick = () => applyAffordance(name);
+    affBar.appendChild(btn);
+  }
+
+  // Flow view — shows the chain of affordances applied
+  const flowView = document.createElement('div');
+  flowView.id = 'flow-view';
+  composerContent.appendChild(flowView);
+
+  function updateFlowView() {
+    flowView.innerHTML = '';
+
+    // Collect all transforms in order
+    const transforms = [];
+    for (const [label, shape] of Object.entries(F)) {
+      if (shape && typeof shape === 'object' && !Array.isArray(shape) && 's' in shape) {
+        transforms.push({ label, ...shape });
+      }
+    }
+
+    if (transforms.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.color = '#555';
+      empty.style.padding = '20px';
+      empty.textContent = 'Click an affordance above to begin.';
+      flowView.appendChild(empty);
+      return;
+    }
+
+    for (const t of transforms) {
+      const step = document.createElement('div');
+      step.className = 'flow-step';
+
+      // Affordance name (from wire)
+      const affName = document.createElement('span');
+      affName.className = 'flow-affordance';
+      affName.textContent = t.w || '?';
+      step.appendChild(affName);
+
+      const arrow = document.createElement('span');
+      arrow.className = 'flow-arrow';
+      arrow.textContent = ' → ';
+      step.appendChild(arrow);
+
+      if (t.r && t.r.length > 0) {
+        // Show residue chain
+        const chain = document.createElement('span');
+        chain.className = 'flow-shape';
+        const lastResidueTarget = t.r[t.r.length - 1][1];
+        chain.textContent = `${t.s} → ${lastResidueTarget}`;
+        step.appendChild(chain);
+
+        const status = document.createElement('span');
+        const [ok] = verify(t.s, t.t, t.r);
+        status.className = `flow-status ${ok ? 'ok' : 'fail'}`;
+        status.textContent = ok ? '✓' : 'CUT';
+        step.appendChild(status);
+      } else {
+        const pending = document.createElement('span');
+        pending.style.color = '#555';
+        pending.textContent = '(not struck)';
+        step.appendChild(pending);
+      }
+
+      flowView.appendChild(step);
+
+      // Show full residue details
+      if (t.r && t.r.length > 1) {
+        for (const r of t.r) {
+          const detail = document.createElement('div');
+          detail.style.paddingLeft = '24px';
+          detail.style.fontSize = '11px';
+          detail.style.color = '#555';
+          detail.textContent = `${r[0]} → ${r[1]}`;
+          flowView.appendChild(detail);
+        }
+      }
+    }
+  }
+
+  // Compose controls: reset, name, save
+  const composeControls = document.createElement('div');
+  composeControls.id = 'compose-controls';
+  composerContent.appendChild(composeControls);
+
+  const resetBtn = document.createElement('button');
+  resetBtn.textContent = 'reset';
+  resetBtn.onclick = () => {
+    Object.keys(F).forEach(k => delete F[k]);
+    outputEl.innerHTML = '';
+    composeStepCount = 0;
+    updateFlowView();
+    updateInspector();
+  };
+  composeControls.appendChild(resetBtn);
+
+  // Preset compositions
+  const compositionPresets = {
+    'Bell State': ['superpose', 'entangle'],
+    'Measure': ['superpose', 'collapse'],
+    'Teleport': ['superpose', 'entangle', 'teleport'],
+    'Interfere+': ['superpose', 'interfere'],
+    'Ring': ['ring'],
+  };
+
+  for (const [name, sequence] of Object.entries(compositionPresets)) {
+    const btn = document.createElement('button');
+    btn.textContent = name;
+    btn.onclick = () => {
+      // Reset
+      Object.keys(F).forEach(k => delete F[k]);
+      outputEl.innerHTML = '';
+      composeStepCount = 0;
+      emit(`--- ${name} ---`);
+      for (const aff of sequence) {
+        applyAffordance(aff);
+      }
+    };
+    composeControls.appendChild(btn);
+  }
+
+  // ---- CONSOLE TAB ----
+  const consoleContent = document.createElement('div');
+  consoleContent.className = 'tab-content';
+  left.appendChild(consoleContent);
+
   outputEl = document.createElement('div');
   outputEl.id = 'output';
-  left.appendChild(outputEl);
+  consoleContent.appendChild(outputEl);
 
   const inputArea = document.createElement('div');
   inputArea.id = 'input-area';
-  left.appendChild(inputArea);
+  consoleContent.appendChild(inputArea);
 
   const consoleEl = document.createElement('textarea');
   consoleEl.id = 'console';
@@ -598,6 +823,8 @@ function buildSurface() {
   clearBtn.onclick = () => {
     Object.keys(F).forEach(k => delete F[k]);
     outputEl.innerHTML = '';
+    composeStepCount = 0;
+    updateFlowView();
     updateInspector();
   };
   controls.appendChild(clearBtn);
@@ -609,8 +836,10 @@ function buildSurface() {
     btn.onclick = () => {
       Object.keys(F).forEach(k => delete F[k]);
       outputEl.innerHTML = '';
+      composeStepCount = 0;
       emit(`--- ${name} ---`);
       executeASF(PRESETS[name]);
+      updateFlowView();
     };
     controls.appendChild(btn);
   }
@@ -622,6 +851,17 @@ function buildSurface() {
       strikeBtn.click();
     }
   });
+
+  // Tab switching
+  function switchTab(active) {
+    tabComposer.className = `tab ${active === 'composer' ? 'active' : ''}`;
+    tabConsole.className = `tab ${active === 'console' ? 'active' : ''}`;
+    composerContent.className = `tab-content ${active === 'composer' ? 'active' : ''}`;
+    consoleContent.className = `tab-content ${active === 'console' ? 'active' : ''}`;
+    if (active === 'composer') updateFlowView();
+  }
+  tabComposer.onclick = () => switchTab('composer');
+  tabConsole.onclick = () => switchTab('console');
 
   // Right panel: flowspace inspector
   const right = document.createElement('div');
@@ -636,6 +876,15 @@ function buildSurface() {
   const inspector = document.createElement('div');
   inspector.id = 'inspector';
   right.appendChild(inspector);
+}
+
+function updateFlowViewIfVisible() {
+  const fv = document.getElementById('flow-view');
+  if (fv && fv.closest('.tab-content.active')) {
+    // flow view rebuild is handled by updateFlowView which is defined in buildSurface
+    // we trigger it via a custom event
+    fv.dispatchEvent(new Event('refresh'));
+  }
 }
 
 function updateInspector() {
