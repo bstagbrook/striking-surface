@@ -286,7 +286,8 @@ function executeASF(text) {
       }
     }
   }
-  updateInspector();
+  if (window._refreshAll) window._refreshAll();
+  else updateInspector();
 }
 
 // ============================================================
@@ -463,6 +464,249 @@ wire step3 collapse
 strike step3
 disclose step3`
 };
+
+// ============================================================
+// VISUALIZATION — shapes that render other shapes
+// ============================================================
+
+// Parse a quantum state string like "0.7071|00>+0.7071|11>" into components
+function parseQuantumState(stateStr) {
+  const components = [];
+  if (!stateStr || !stateStr.includes('|')) return components;
+  // Match terms like 0.7071|00> or -0.7071|01>
+  const re = /([+-]?\d*\.?\d+)\|([01]+)>/g;
+  let m;
+  while ((m = re.exec(stateStr)) !== null) {
+    components.push({ amplitude: parseFloat(m[1]), basis: m[2], probability: parseFloat(m[1]) ** 2 });
+  }
+  // Also match bare kets like |0> or |1> (amplitude = 1)
+  if (components.length === 0) {
+    const bareRe = /\|([01]+)>/g;
+    while ((m = bareRe.exec(stateStr)) !== null) {
+      components.push({ amplitude: 1, basis: m[1], probability: 1 });
+    }
+  }
+  return components;
+}
+
+// Get the current quantum state from the last transform's residue
+function getCurrentState() {
+  let lastState = null;
+  for (const [label, shape] of Object.entries(F)) {
+    if (shape && typeof shape === 'object' && !Array.isArray(shape) && shape.r && shape.r.length > 0) {
+      lastState = shape.r[shape.r.length - 1][1];
+    }
+  }
+  return lastState;
+}
+
+// Build state display: ket notation + probability bars
+function renderStateDisplay(container) {
+  container.innerHTML = '';
+  const state = getCurrentState();
+  if (!state) {
+    container.textContent = 'No quantum state yet.';
+    container.style.color = '#555';
+    return;
+  }
+
+  const components = parseQuantumState(state);
+  if (components.length === 0) {
+    const raw = document.createElement('div');
+    raw.style.color = '#99a';
+    raw.textContent = `state: ${state}`;
+    container.appendChild(raw);
+    return;
+  }
+
+  // Ket notation
+  const ket = document.createElement('div');
+  ket.style.marginBottom = '8px';
+  ket.style.color = '#aab';
+  const ketParts = components.map((c, i) => {
+    const sign = c.amplitude >= 0 && i > 0 ? '+' : '';
+    return `${sign}${c.amplitude.toFixed(4)}|${c.basis}\u27E9`;
+  });
+  ket.textContent = `|\u03C8\u27E9 = ${ketParts.join(' ')}`;
+  container.appendChild(ket);
+
+  // Probability bars
+  const totalProb = components.reduce((s, c) => s + c.probability, 0);
+  for (const c of components) {
+    const row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.alignItems = 'center';
+    row.style.marginBottom = '3px';
+
+    const label = document.createElement('span');
+    label.style.width = '60px';
+    label.style.color = '#888';
+    label.style.fontSize = '12px';
+    label.textContent = `|${c.basis}\u27E9`;
+    row.appendChild(label);
+
+    const barOuter = document.createElement('div');
+    barOuter.style.flex = '1';
+    barOuter.style.height = '14px';
+    barOuter.style.background = '#111';
+    barOuter.style.border = '1px solid #222';
+    barOuter.style.position = 'relative';
+
+    const barInner = document.createElement('div');
+    const pct = totalProb > 0 ? (c.probability / totalProb * 100) : 0;
+    barInner.style.width = `${pct}%`;
+    barInner.style.height = '100%';
+    // Color by phase: positive = green, negative = red
+    barInner.style.background = c.amplitude >= 0 ? '#2a4a2a' : '#4a2a2a';
+    barOuter.appendChild(barInner);
+    row.appendChild(barOuter);
+
+    const prob = document.createElement('span');
+    prob.style.width = '50px';
+    prob.style.textAlign = 'right';
+    prob.style.color = '#777';
+    prob.style.fontSize = '11px';
+    prob.textContent = `${(c.probability * 100).toFixed(1)}%`;
+    row.appendChild(prob);
+
+    container.appendChild(row);
+  }
+}
+
+// Measurement histogram: run N collapses and show distribution
+function renderHistogram(container, shots) {
+  container.innerHTML = '';
+  const state = getCurrentState();
+  if (!state) {
+    container.textContent = 'No quantum state to measure.';
+    container.style.color = '#555';
+    return;
+  }
+
+  // Run shots using the collapse waveform
+  const counts = {};
+  for (let i = 0; i < shots; i++) {
+    const raw = waveforms.collapse(state, 'ground');
+    const parts = raw.split('->');
+    if (parts.length >= 2) {
+      const outcome = parts[parts.length - 1].trim();
+      counts[outcome] = (counts[outcome] || 0) + 1;
+    }
+  }
+
+  const title = document.createElement('div');
+  title.style.color = '#888';
+  title.style.marginBottom = '6px';
+  title.textContent = `${shots} measurements:`;
+  container.appendChild(title);
+
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  for (const [outcome, count] of sorted) {
+    const row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.alignItems = 'center';
+    row.style.marginBottom = '3px';
+
+    const label = document.createElement('span');
+    label.style.width = '60px';
+    label.style.color = '#888';
+    label.style.fontSize = '12px';
+    label.textContent = outcome;
+    row.appendChild(label);
+
+    const barOuter = document.createElement('div');
+    barOuter.style.flex = '1';
+    barOuter.style.height = '14px';
+    barOuter.style.background = '#111';
+    barOuter.style.border = '1px solid #222';
+
+    const barInner = document.createElement('div');
+    barInner.style.width = `${count / shots * 100}%`;
+    barInner.style.height = '100%';
+    barInner.style.background = '#2a3a4a';
+    barOuter.appendChild(barInner);
+    row.appendChild(barOuter);
+
+    const pct = document.createElement('span');
+    pct.style.width = '70px';
+    pct.style.textAlign = 'right';
+    pct.style.color = '#777';
+    pct.style.fontSize = '11px';
+    pct.textContent = `${count} (${(count / shots * 100).toFixed(1)}%)`;
+    row.appendChild(pct);
+
+    container.appendChild(row);
+  }
+}
+
+// Flowspace map: show all shapes and transforms as text graph
+function renderFlowspaceMap(container) {
+  container.innerHTML = '';
+  const shapes = [];
+  const transforms = [];
+
+  for (const [label, shape] of Object.entries(F)) {
+    if (label.startsWith('_')) continue; // skip internal shapes
+    if (shape && typeof shape === 'object' && !Array.isArray(shape) && 's' in shape) {
+      transforms.push({ label, ...shape });
+    } else {
+      shapes.push({ label, value: shape });
+    }
+  }
+
+  if (shapes.length === 0 && transforms.length === 0) {
+    container.textContent = 'Flowspace is empty.';
+    container.style.color = '#555';
+    return;
+  }
+
+  // Shapes
+  if (shapes.length > 0) {
+    const hdr = document.createElement('div');
+    hdr.style.color = '#777';
+    hdr.style.marginBottom = '4px';
+    hdr.textContent = 'SHAPES';
+    container.appendChild(hdr);
+
+    for (const s of shapes) {
+      const row = document.createElement('div');
+      row.style.paddingLeft = '8px';
+      row.style.color = '#9a9';
+      row.style.marginBottom = '2px';
+      row.textContent = `${s.label} = ${Array.isArray(s.value) ? `[${s.value.join(', ')}]` : String(s.value)}`;
+      container.appendChild(row);
+    }
+  }
+
+  // Transforms
+  if (transforms.length > 0) {
+    const hdr = document.createElement('div');
+    hdr.style.color = '#777';
+    hdr.style.marginTop = '8px';
+    hdr.style.marginBottom = '4px';
+    hdr.textContent = 'TRANSFORMS';
+    container.appendChild(hdr);
+
+    for (const t of transforms) {
+      const row = document.createElement('div');
+      row.style.paddingLeft = '8px';
+      row.style.marginBottom = '2px';
+
+      const [ok] = t.r.length > 0 ? verify(t.s, t.t, t.r) : [false];
+      row.style.color = t.r.length > 0 ? (ok ? '#6a6' : '#a66') : '#888';
+
+      let text = `${t.label}: (${t.s}) → (${t.t})`;
+      if (t.w) text += ` ~ ${t.w}`;
+      if (t.r.length > 0) {
+        text += ok ? ' ✓' : ' CUT';
+        const endpoint = t.r[t.r.length - 1][1];
+        text += ` → ${endpoint}`;
+      }
+      row.textContent = text;
+      container.appendChild(row);
+    }
+  }
+}
 
 // ============================================================
 // THE SURFACE — shapes pass through HTML
@@ -863,19 +1107,112 @@ function buildSurface() {
   tabComposer.onclick = () => switchTab('composer');
   tabConsole.onclick = () => switchTab('console');
 
-  // Right panel: flowspace inspector
+  // Right panel: visualization tabs
   const right = document.createElement('div');
   right.id = 'right';
   surface.appendChild(right);
 
+  const rightTabs = document.createElement('div');
+  rightTabs.id = 'tabs';
+  rightTabs.style.borderBottom = '1px solid #333';
+  right.appendChild(rightTabs);
+
+  const vizTabs = ['state', 'histogram', 'map', 'F'];
+  const vizContents = {};
+  let activeVizTab = 'state';
+
+  for (const name of vizTabs) {
+    const tab = document.createElement('div');
+    tab.className = `tab ${name === activeVizTab ? 'active' : ''}`;
+    tab.textContent = name;
+    tab.onclick = () => {
+      activeVizTab = name;
+      for (const n of vizTabs) {
+        rightTabs.children[vizTabs.indexOf(n)].className = `tab ${n === name ? 'active' : ''}`;
+        vizContents[n].className = `tab-content ${n === name ? 'active' : ''}`;
+      }
+      refreshViz();
+    };
+    rightTabs.appendChild(tab);
+  }
+
+  // State display
+  const stateContent = document.createElement('div');
+  stateContent.className = 'tab-content active';
+  stateContent.style.padding = '8px';
+  stateContent.style.overflowY = 'auto';
+  stateContent.style.flex = '1';
+  right.appendChild(stateContent);
+  vizContents['state'] = stateContent;
+
+  // Histogram
+  const histContent = document.createElement('div');
+  histContent.className = 'tab-content';
+  histContent.style.padding = '8px';
+  histContent.style.overflowY = 'auto';
+  histContent.style.flex = '1';
+  right.appendChild(histContent);
+  vizContents['histogram'] = histContent;
+
+  // Shot controls
+  const shotControls = document.createElement('div');
+  shotControls.style.marginBottom = '8px';
+  shotControls.style.display = 'flex';
+  shotControls.style.gap = '4px';
+  for (const n of [100, 1000, 10000]) {
+    const btn = document.createElement('button');
+    btn.textContent = `${n} shots`;
+    btn.onclick = () => renderHistogram(histResults, n);
+    shotControls.appendChild(btn);
+  }
+  histContent.appendChild(shotControls);
+  const histResults = document.createElement('div');
+  histContent.appendChild(histResults);
+
+  // Map
+  const mapContent = document.createElement('div');
+  mapContent.className = 'tab-content';
+  mapContent.style.padding = '8px';
+  mapContent.style.overflowY = 'auto';
+  mapContent.style.flex = '1';
+  right.appendChild(mapContent);
+  vizContents['map'] = mapContent;
+
+  // Flowspace inspector (F)
+  const inspectorContent = document.createElement('div');
+  inspectorContent.className = 'tab-content';
+  inspectorContent.style.overflowY = 'auto';
+  inspectorContent.style.flex = '1';
+  right.appendChild(inspectorContent);
+  vizContents['F'] = inspectorContent;
+
   const inspectorTitle = document.createElement('div');
   inspectorTitle.id = 'inspector-title';
+  inspectorTitle.style.padding = '8px';
   inspectorTitle.textContent = 'FLOWSPACE (F)';
-  right.appendChild(inspectorTitle);
+  inspectorContent.appendChild(inspectorTitle);
 
   const inspector = document.createElement('div');
   inspector.id = 'inspector';
-  right.appendChild(inspector);
+  inspector.style.padding = '0 8px 8px 8px';
+  inspectorContent.appendChild(inspector);
+
+  function refreshViz() {
+    if (activeVizTab === 'state') renderStateDisplay(stateContent);
+    else if (activeVizTab === 'histogram') { /* rendered on button click */ }
+    else if (activeVizTab === 'map') renderFlowspaceMap(mapContent);
+    else if (activeVizTab === 'F') updateInspector();
+  }
+
+  // Hook into executeASF to auto-refresh visualizations
+  const origUpdateInspector = updateInspector;
+  const hookedUpdateInspector = () => {
+    origUpdateInspector();
+    refreshViz();
+    updateFlowView();
+  };
+  // Replace the global call in executeASF
+  window._refreshAll = hookedUpdateInspector;
 }
 
 function updateFlowViewIfVisible() {
