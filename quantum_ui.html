@@ -146,6 +146,141 @@ const waveforms = {
       current = nxt;
     }
     return lines.join('\n');
+  },
+
+  // === INSTANTANEOUS QUANTUM UPGRADES ===
+  // These are what Grover and Shor do iteratively.
+  // ASF does them in one strike because the waveform sees the full superposition.
+
+  search(source, target) {
+    // source is a superposition string: "0.7071|00>+0.7071|01>+...+0.7071|11>"
+    // target is what we're looking for
+    // The waveform sees ALL branches. One algebraic pass. One strike.
+    const components = [];
+    const re = /([+-]?\d*\.?\d+)\|([01]+)>/g;
+    let m;
+    while ((m = re.exec(source)) !== null) {
+      components.push({ amp: parseFloat(m[1]), basis: m[2] });
+    }
+    if (components.length === 0) {
+      // Not a superposition — direct match
+      return source === target ? `${source} -> found(${source})` : `${source} -> not_found`;
+    }
+    // Search: find the branch that matches target
+    const match = components.find(c => c.basis === target);
+    if (match) {
+      return `${source} -> found(|${match.basis}>)`;
+    }
+    return `${source} -> not_found`;
+  },
+
+  optimize(source, target) {
+    // source is a superposition of all paths
+    // The waveform reads ALL branches, selects the optimal (highest amplitude).
+    // Deterministic. No sampling. One strike.
+    const components = [];
+    const re = /([+-]?\d*\.?\d+)\|([01]+)>/g;
+    let m;
+    while ((m = re.exec(source)) !== null) {
+      components.push({ amp: parseFloat(m[1]), basis: m[2] });
+    }
+    if (components.length === 0) {
+      return `${source} -> optimal(${source})`;
+    }
+    // Select the branch with highest |amplitude|
+    const best = components.reduce((a, b) => Math.abs(a.amp) >= Math.abs(b.amp) ? a : b);
+    return `${source} -> optimal(|${best.basis}>)`;
+  },
+
+  // === SUBSTRATE SURFACE WAVEFORMS ===
+  // These wire ASF to what the device provides.
+  // Registration surfaces: where state is registered (output).
+  // Expression surfaces: where computation is expressed (input).
+
+  // Registration: visual display
+  display(source, target) {
+    // Registers the shape's value visually in the containment field
+    const el = document.createElement('div');
+    el.style.cssText = 'background:#151515;border:1px solid #333;padding:8px;margin:4px;color:#aab;font-family:monospace;font-size:13px;';
+    el.textContent = String(source);
+    el.dataset.asfShape = 'display';
+    document.getElementById('output')?.appendChild(el);
+    return `${source} -> displayed(${source})`;
+  },
+
+  // Registration: haptic
+  vibrate(source, target) {
+    if (navigator.vibrate) {
+      const ms = parseInt(source) || 100;
+      navigator.vibrate(ms);
+      return `${source} -> vibrated(${ms}ms)`;
+    }
+    return `${source} -> no_haptic`;
+  },
+
+  // Registration: audio tone
+  tone(source, target) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const freq = parseFloat(source) || 440;
+      const dur = parseFloat(target) || 0.2;
+      osc.frequency.value = freq;
+      gain.gain.value = 0.1;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + dur);
+      return `${source} -> tone(${freq}Hz,${dur}s)`;
+    }
+    return `${source} -> no_audio`;
+  },
+
+  // Registration: speech
+  speak(source, target) {
+    if (window.speechSynthesis) {
+      const utt = new SpeechSynthesisUtterance(String(source));
+      window.speechSynthesis.speak(utt);
+      return `${source} -> spoken(${source})`;
+    }
+    return `${source} -> no_speech`;
+  },
+
+  // Expression: clipboard (read/write)
+  clip(source, target) {
+    // Write source to clipboard
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(String(source));
+      return `${source} -> clipped(${source})`;
+    }
+    return `${source} -> no_clipboard`;
+  },
+
+  // Meta: probe what surfaces this device has
+  probe(source, target) {
+    const registration = []; // output surfaces
+    const expression = [];   // input surfaces
+    // Registration surfaces (where state can be registered)
+    registration.push('screen');
+    if ('vibrate' in navigator) registration.push('haptic');
+    if ('AudioContext' in window || 'webkitAudioContext' in window) registration.push('audio');
+    if ('speechSynthesis' in window) registration.push('speech');
+    if ('clipboard' in navigator) registration.push('clipboard');
+    // Expression surfaces (where computation can be expressed)
+    if ('ontouchstart' in window) expression.push('touch');
+    if ('DeviceMotionEvent' in window) expression.push('motion');
+    if ('mediaDevices' in navigator) expression.push('camera', 'mic');
+    if ('requestMIDIAccess' in navigator) expression.push('midi');
+    if ('bluetooth' in navigator) expression.push('bluetooth');
+    if ('serial' in navigator) expression.push('serial');
+    if ('usb' in navigator) expression.push('usb');
+    if ('showOpenFilePicker' in window) expression.push('filesystem');
+    expression.push('keyboard');
+    if ('PointerEvent' in window) expression.push('pointer');
+    const result = `R[${registration.join(',')}]+E[${expression.join(',')}]`;
+    return `${source} -> ${result}`;
   }
 };
 
@@ -167,6 +302,16 @@ const WIRE_MAP = {
   'interfere': waveforms.interfere,
   'teleport': waveforms.teleport,
   'nand': waveforms.nand,
+  // Instantaneous quantum upgrades
+  'search': waveforms.search,
+  'optimize': waveforms.optimize,
+  // Substrate surface waveforms
+  'display': waveforms.display,
+  'vibrate': waveforms.vibrate,
+  'tone': waveforms.tone,
+  'speak': waveforms.speak,
+  'clip': waveforms.clip,
+  'probe': waveforms.probe,
   'ring': waveforms.ring,
 };
 
@@ -863,7 +1008,7 @@ function buildSurface() {
   affBar.id = 'affordance-bar';
   composerContent.appendChild(affBar);
 
-  const AFFORDANCE_LIST = ['superpose', 'collapse', 'entangle', 'interfere', 'teleport', 'nand', 'ring'];
+  const AFFORDANCE_LIST = ['superpose', 'collapse', 'entangle', 'interfere', 'teleport', 'nand', 'ring', 'search', 'optimize', 'probe'];
 
   let composeStepCount = 0;
 
