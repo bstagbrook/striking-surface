@@ -114,10 +114,76 @@
                        (filter (λ (p) (not (equal? (->str (car p)) from)))
                                real-pairs)))))))
 
+;;; ─── quantum-trace ─────────────────────────────────────────
+;;; Like trace, but finds ALL matching paths from source.
+;;; Returns a list of possible chains — superposition.
+;;; Each chain is a list of (from . to) pairs.
+;;; Classical trace = first element of quantum-trace.
+
+(define (quantum-trace src pairs)
+  (let* ([real-pairs (filter (λ (p) (and (pair? p) (not (list? p)))) pairs)]
+         [str-pairs (map (λ (p) (cons (->str (car p)) (cdr p))) real-pairs)]
+         [matches (filter (λ (p) (equal? (car p) (->str src))) str-pairs)])
+    (if (null? matches) '(())
+        (apply append
+               (map (λ (step)
+                      (let* ([from (->str src)]
+                             [to (->str (cdr step))]
+                             [remaining (filter (λ (p) (not (equal? (->str (car p)) from)))
+                                                real-pairs)]
+                             [continuations (quantum-trace (cdr step) remaining)])
+                        (map (λ (cont) (cons (cons from to) cont))
+                             continuations)))
+                    matches)))))
+
+;;; ─── quantum-resolve ───────────────────────────────────────
+;;; Like resolve, but uses quantum-trace for transforms whose
+;;; label starts with "q:" — returns all possible residues.
+;;; Classical transforms (no "q:" prefix) use normal trace.
+
+(define (quantum-resolve shape)
+  (cond
+    [(symbol? shape) shape]
+    [(string? shape) shape]
+    [(number? shape) shape]
+    [(null? shape) shape]
+
+    [(and (list? shape) (= (length shape) 4)
+          (symbol? (first shape))
+          (list? (second shape))
+          (list? (third shape))
+          (list? (fourth shape)))
+     (let* ([label (first shape)]
+            [src (quantum-resolve (second shape))]
+            [tgt (quantum-resolve (third shape))]
+            [pairs (fourth shape)]
+            [unwrapped (cond [(not (list? src)) src]
+                             [(null? src) src]
+                             [(= (length src) 1) (first src)]
+                             [else (first src)])]
+            [seed (if (and (list? unwrapped)
+                           (>= (length unwrapped) 1)
+                           (symbol? (first unwrapped)))
+                      (first unwrapped)
+                      unwrapped)]
+            ;; Quantum: if label starts with "q:", use quantum-trace
+            [is-quantum (let ([s (symbol->string label)])
+                          (and (>= (string-length s) 2)
+                               (equal? (substring s 0 2) "q:")))]
+            [residue (if is-quantum
+                         (quantum-trace seed pairs)
+                         (trace seed pairs))])
+       (list label src tgt residue))]
+
+    [(list? shape)
+     (map quantum-resolve shape)]
+
+    [else shape]))
+
 ;;; ─── strike-module-begin: the spark gap ────────────────────
 ;;; #lang strike reads the file. This fires once. The shape resolves.
 
 (define-syntax-rule (strike-module-begin expr ...)
   (#%plain-module-begin
-   (let ([results (list (resolve 'expr) ...)])
+   (let ([results (list (quantum-resolve 'expr) ...)])
      (for-each displayln results))))
