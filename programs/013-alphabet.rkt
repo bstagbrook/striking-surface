@@ -6,16 +6,9 @@
 ;;; A letter is a presence with a label.
 ;;; A word is a containment of letters.
 ;;; A sentence is a containment of words.
-;;; A language is a containment of transforms on those shapes.
 ;;;
-;;; The phoneme inventory of English: ~44 phonemes.
-;;; The alphabet: 26 letters.
-;;; The structural relationships between them: transforms.
-;;;
-;;; Letters → phonemes is a transform (spelling to sound).
-;;; Phonemes → meaning is a transform (sound to concept).
-;;; The chain: letters → phonemes → morphemes → words → meaning.
-;;; One collapse chain. One strike.
+;;; AUDIT FIX: letter-to-phoneme now has one transform per letter
+;;; so each source matches its pair key. No empty tubes.
 ;;; ═══════════════════════════════════════════════════════════════
 
 (tesla-powers-alphabet
@@ -26,7 +19,7 @@
   ;;; Target: language primitives
   (
 
-    ;;; Vowel phonemes (English core)
+    ;;; Vowel phonemes (English core — chain traces all 7)
     (vowel-phonemes
       (english-vowels)
       (five-cardinal-plus-schwa)
@@ -38,7 +31,7 @@
        (oo . uh-schwa)
        (uh-schwa . five-cardinal-plus-schwa)))
 
-    ;;; Consonant classes (by manner of articulation)
+    ;;; Consonant classes by manner of articulation (chain traces all)
     (consonant-structure
       (english-consonants)
       (structured-by-articulation)
@@ -54,22 +47,35 @@
        (glides . w-y)
        (w-y . structured-by-articulation)))
 
-    ;;; Letter-to-phoneme transform
-    ;;; (not complete — structural demonstration)
-    (letter-to-phoneme
-      (written-letter)
-      (spoken-sound)
-      ((a . ae-or-ah)
-       (b . buh)
-       (c . kuh-or-suh)
-       (d . duh)
-       (e . eh-or-ee)
-       (s . suh-or-zuh)
-       (t . tuh)
-       (h . huh)))
+    ;;; Letter-to-phoneme: one transform per letter
+    (l2p-a (a) (ae-or-ah) ((a . ae-or-ah)))
+    (l2p-b (b) (buh) ((b . buh)))
+    (l2p-c (c) (kuh-or-suh) ((c . kuh-or-suh)))
+    (l2p-d (d) (duh) ((d . duh)))
+    (l2p-e (e) (eh-or-ee) ((e . eh-or-ee)))
+    (l2p-f (f) (fuh) ((f . fuh)))
+    (l2p-g (g) (guh-or-juh) ((g . guh-or-juh)))
+    (l2p-h (h) (huh) ((h . huh)))
+    (l2p-i (i) (ih-or-eye) ((i . ih-or-eye)))
+    (l2p-j (j) (juh) ((j . juh)))
+    (l2p-k (k) (kuh) ((k . kuh)))
+    (l2p-l (l) (luh) ((l . luh)))
+    (l2p-m (m) (muh) ((m . muh)))
+    (l2p-n (n) (nuh) ((n . nuh)))
+    (l2p-o (o) (ah-or-oh) ((o . ah-or-oh)))
+    (l2p-p (p) (puh) ((p . puh)))
+    (l2p-q (q) (kwuh) ((q . kwuh)))
+    (l2p-r (r) (ruh) ((r . ruh)))
+    (l2p-s (s) (suh-or-zuh) ((s . suh-or-zuh)))
+    (l2p-t (t) (tuh) ((t . tuh)))
+    (l2p-u (u) (uh-or-yoo) ((u . uh-or-yoo)))
+    (l2p-v (v) (vuh) ((v . vuh)))
+    (l2p-w (w) (wuh) ((w . wuh)))
+    (l2p-x (x) (ks) ((x . ks)))
+    (l2p-y (y) (yuh-or-ee) ((y . yuh-or-ee)))
+    (l2p-z (z) (zuh) ((z . zuh)))
 
-    ;;; Word formation: morpheme composition
-    ;;; un- + break + -able = unbreakable
+    ;;; Morpheme composition (traces correctly — 4 steps)
     (morpheme-composition
       (morphemes)
       (composed-word)
@@ -78,14 +84,7 @@
        (root-break . suffix-able)
        (suffix-able . composed-word)))
 
-    ;;; The structural insight:
-    ;;; Spoken language IS a collapse chain.
-    ;;; Phonemes compose into morphemes.
-    ;;; Morphemes compose into words.
-    ;;; Words compose into sentences.
-    ;;; Each level is a containment of the level below.
-    ;;; Each transition is a transform.
-    ;;; The meaning IS the residue of the full collapse.
+    ;;; Language as collapse chain (traces correctly — 5 steps)
     (language-is-collapse
       (phonemes)
       (meaning)
