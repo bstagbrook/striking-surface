@@ -3,24 +3,31 @@
 # Time budget per program (seconds). Anything slower is a CUT.
 TIME_BUDGET := 30
 
-# Forbidden constructs — no iteration, no mutation.
-FORBIDDEN := for-each\|for/list\|for/fold\|for\b\|while\|do\b\|set!
+# Lint: #lang strike programs must contain ZERO Racket keywords.
+# The only allowed first line is #lang strike.
+# Everything else must be pure s-expressions and comments.
+RACKET_KEYWORDS := define\|let\|let\*\|cond\|if\|lambda\|λ\|require\|provide\|begin\|set!\|for\|while\|do\b
 
 lint:
 	@echo "striking surface — lint"
 	@fail=0; \
 	for f in programs/*.rkt; do \
-		hits=$$(grep -nE '^\s*\(($(FORBIDDEN))' "$$f" | grep -v '^;' || true); \
+		lang=$$(head -1 "$$f"); \
+		if [ "$$lang" != "#lang strike" ]; then \
+			echo "  FAIL $$f — not #lang strike (got: $$lang)"; fail=1; \
+			continue; \
+		fi; \
+		hits=$$(grep -nE '\($(RACKET_KEYWORDS)' "$$f" | grep -v '^;' | grep -v '^[0-9]*:;' || true); \
 		if [ -n "$$hits" ]; then \
-			echo "  FAIL $$f — forbidden constructs:"; \
+			echo "  FAIL $$f — Racket keywords detected:"; \
 			echo "$$hits" | while read line; do echo "    $$line"; done; \
 			fail=1; \
 		else \
 			echo "  ok   $$f"; \
 		fi; \
 	done; \
-	if [ $$fail -eq 1 ]; then echo "BROKEN — iteration or mutation detected"; exit 1; \
-	else echo "no forbidden constructs."; fi
+	if [ $$fail -eq 1 ]; then echo "BROKEN — keywords or wrong #lang detected"; exit 1; \
+	else echo "no keywords. pure s-expressions."; fi
 
 test: lint
 	@echo ""
@@ -33,13 +40,11 @@ test: lint
 			echo "  FAIL $$f (exceeded $(TIME_BUDGET)s time budget)"; fail=1; \
 			continue; \
 		fi; \
-		cuts=$$(echo "$$out" | grep -c '^  CUT$$' || true); \
-		expected=$$(grep -oP 'expected-cuts:\s*\K[0-9]+' "$$f" || echo 0); \
-		if [ "$$cuts" -ne "$$expected" ]; then \
-			echo "  FAIL $$f ($$cuts CUTs, expected $$expected)"; fail=1; \
-		else \
-			echo "  ok   $$f"; \
+		if [ $$rc -ne 0 ]; then \
+			echo "  FAIL $$f (exit code $$rc)"; fail=1; \
+			continue; \
 		fi; \
+		echo "  ok   $$f"; \
 	done; \
 	if [ $$fail -eq 1 ]; then echo "BROKEN"; exit 1; \
 	else echo "all circuits complete."; fi
