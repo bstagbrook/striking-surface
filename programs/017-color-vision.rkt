@@ -66,12 +66,12 @@
     ;;; Gold's color: the relativistic domain meets the vision domain
     ;;; This is a CROSS-DOMAIN transform. Relativity (005) meets vision.
     (gold-appears-yellow
-      (5d-6s-gap-at-2.4eV)
+      (gap-2.4eV)
       (perceived-yellow)
-      ((5d-6s-gap-at-2.4eV . absorbs-blue-photons)
-       (absorbs-blue-photons . reflects-red+green)
-       (reflects-red+green . L+M-cones-stimulated)
-       (L+M-cones-stimulated . perceived-yellow)))
+      ((gap-2.4eV . absorbs-blue)
+       (absorbs-blue . reflects-red+green)
+       (reflects-red+green . L-M-cones-stimulated)
+       (L-M-cones-stimulated . perceived-yellow)))
 
     ;;; Episteme-rolled: the eye IS the color space
     (eye-is-color-space

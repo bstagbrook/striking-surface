@@ -60,8 +60,8 @@
       ((Z=79-5d10-6s1 . 6s-contracts-17-percent)
        (6s-contracts-17-percent . 5d-expands-8-percent)
        (5d-expands-8-percent . gap-shrinks-to-2.4eV)
-       (gap-shrinks-to-2.4eV . absorbs-blue-light)
-       (absorbs-blue-light . yellow-color-from-relativity)))
+       (gap-shrinks-to-2.4eV . absorbs-blue)
+       (absorbs-blue . yellow-color-from-relativity)))
 
     ;;; Mercury: Z=80, liquid at room temperature
     (mercury

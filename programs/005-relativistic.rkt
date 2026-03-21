@@ -40,8 +40,8 @@
       (color-yellow)
       ((6s-inner . 6s-contracted)
        (6s-contracted . 5d-expanded)
-       (5d-expanded . gap-shrunk-to-2.4eV)
-       (gap-shrunk-to-2.4eV . absorbs-blue)
+       (5d-expanded . gap-2.4eV)
+       (gap-2.4eV . absorbs-blue)
        (absorbs-blue . reflects-yellow)
        (reflects-yellow . color-yellow)))
 
