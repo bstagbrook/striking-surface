@@ -3,15 +3,32 @@
 ;;; ═══════════════════════════════════════════════════════════════
 ;;; MEET-N-GREET — TURING COMPLETE ENGLISH SUBSET
 ;;;
+;;; PURPOSE: Universal interface protocol for cross-domain
+;;; composition. When two domains need to connect, their
+;;; entities introduce themselves via this template.
+;;;
 ;;; "As <label>, I contain <what>, and I express <input> as <output>."
 ;;;
 ;;; First person. Present tense. Grounded in presence.
 ;;; The label is the name. The containment is the body.
 ;;; The expression is the transformation.
 ;;;
-;;; Every component introduces itself to every other.
-;;; The introductions ARE the cross-domain interfaces.
-;;; Meet-n-greet IS the composition protocol.
+;;; An introduction strips a label to reveal the capacitive
+;;; shape beneath. This is disclosure — returning from symbolic
+;;; language to immediate language (presence + containment).
+;;;
+;;; INTERFACES (from archived 023): Shared labels between domains
+;;; are where novelty lives. A domain alone is a dictionary.
+;;; The interface is where generation happens. Numbers are the
+;;; universal medium — every quantitative domain connects through
+;;; them. Power grows combinatorially with domain count.
+;;;
+;;; IMMEDIATE LANGUAGE (from archived 033): Before labels there
+;;; is presence and containment. Animals speak it. Bodies speak
+;;; it. The body's response to creation uses the same circuit as
+;;; eros — dopamine, norepinephrine, parasympathetic shift.
+;;; Not metaphor. Structural identity. One circuit for "yes."
+;;; Yes = direct current. One direction. Source to ground.
 ;;; ═══════════════════════════════════════════════════════════════
 
 (tesla-powers-meet-n-greet

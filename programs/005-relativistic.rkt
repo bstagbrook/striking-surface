@@ -3,14 +3,23 @@
 ;;; ═══════════════════════════════════════════════════════════════
 ;;; RELATIVISTIC DOMAIN MODEL
 ;;;
+;;; PURPOSE: Provide grounded structural facts about relativistic
+;;; quantum phenomena for cross-domain compositions (019 gold,
+;;; 032 HIV/elite-control, future material science compositions).
+;;;
 ;;; Orbital contraction/expansion. Spin-orbit splitting.
-;;; Solitons. Spin from topology. Episteme-rolled affordances.
+;;; Solitons. Spin from topology.
 ;;;
-;;; All powered by Tesla. All pure s-expressions.
-;;; The physics IS the shape. The shape IS the physics.
+;;; EPISTEME-ROLLED (from archived 007): Each formalism affords
+;;; different circuits. Dirac equation doesn't predict antimatter —
+;;; its structure IS antimatter. The tool and the understanding
+;;; it enables are one object. specification = implementation.
 ;;;
-;;; Gold is yellow because of relativity.
-;;; The shape of that fact IS the fact.
+;;; VULNERABILITY (from archived 009): BPS bound E ≥ |Z|.
+;;; At saturation: no excess, no armor, protected by shape alone.
+;;; The one-atom-thick specification IS the optimal implementation.
+;;; Three states: demonstrated, not-yet-demonstrated,
+;;; not-currently-demonstrating. Never "impossible."
 ;;; ═══════════════════════════════════════════════════════════════
 
 (tesla-powers-relativistic-model

@@ -3,14 +3,20 @@
 ;;; ═══════════════════════════════════════════════════════════════
 ;;; NAND UNIVERSALITY — ALL LOGIC FROM ONE GATE
 ;;;
+;;; PURPOSE: Demonstrate that NAND alone produces all Boolean
+;;; logic, establishing functional completeness as a foundation
+;;; for the Turing completeness argument.
+;;;
 ;;; NAND is functionally complete. Every Boolean function can be
 ;;; built from NAND alone. NAND + memory = Turing complete.
 ;;;
-;;; This strike table demonstrates NOT, AND, OR from NAND,
-;;; all powered by a Tesla circuit at the innermost depth.
-;;;
-;;; One shape. One strike. The Tesla fires first (deepest).
-;;; Its energy propagates outward through nesting depth.
+;;; TURING COMPLETENESS ARGUMENT (from archived 006):
+;;; ( ) = presence. (( )) = containment. ((())(())(()))= transform.
+;;; NAND from transform → functional completeness.
+;;; SR latch from cross-coupled NAND → memory.
+;;; Memory + combinational logic → sequential logic → Turing complete.
+;;; All expressible as s-expressions. All s-expressions are Dyck words.
+;;; Therefore: pure Dyck words are Turing complete.
 ;;; ═══════════════════════════════════════════════════════════════
 
 (tesla-powers-universal-logic
