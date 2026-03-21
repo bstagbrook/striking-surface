@@ -1,67 +1,58 @@
 #lang strike
 
 ;;; ═══════════════════════════════════════════════════════════════
-;;; CROSS-DOMAIN: AUTHENTICATION AS CHANNEL CAPACITY
-;;; immune-system × information-theory × HIV × elite-controllers
+;;; CROSS-DOMAIN: HIV ELITE CONTROL — GROUNDED FACTS
+;;; biology x information-theory
 ;;;
-;;; The immune system IS an information channel.
-;;; Self-peptides = signal. Foreign peptides = noise.
-;;; MHC presentation = encoding. T-cell recognition = decoding.
-;;; 
-;;; HIV exploits an unauthenticated port (CD4 binding).
-;;; Elite controllers have higher channel capacity (HLA-B57
-;;; presents HIV peptides more effectively to T-cells).
-;;;
-;;; Shannon channel coding theorem: reliable communication
-;;; is possible at rates below channel capacity.
-;;; Applied to immunology: reliable pathogen detection is
-;;; possible when the immune channel capacity exceeds the
-;;; pathogen mutation rate.
-;;;
-;;; HIV mutates fast (high noise). Most people: channel
-;;; capacity insufficient. Elite controllers: channel capacity
-;;; exceeds HIV mutation rate. Body IS the authentication.
-;;;
-;;; DISCOVERY: The immune system is a Shannon channel.
-;;; Elite control is not mysterious — it is higher channel
-;;; capacity. The structural advantage IS the information
-;;; advantage. This unifies immunology and information theory.
+;;; FRAMING (not in s-expression): The immune system can be
+;;; modeled as a Shannon channel. Elite controllers have higher
+;;; effective channel capacity because HLA-B*57 presents conserved
+;;; HIV epitopes that the virus cannot mutate away from without
+;;; fitness cost. Shannon theorem predicts reliable detection when
+;;; rate < capacity. Elite controllers achieve this.
 ;;; ═══════════════════════════════════════════════════════════════
 
-(cross-domain-authentication-as-channel-capacity
+(tesla-powers-HIV-elite-control
 
-  ;;; Source: the structural question
-  (why-do-elite-controllers-suppress-HIV)
+  ;;; Source: Tesla
+  ((tesla (spark) (power) ((spark . power))))
 
-  ;;; Target: the structural answer
-  (because-channel-capacity-exceeds-mutation-rate)
-
-  ;;; Vacuum tube: the proof chain across four domains
+  ;;; Target: grounded facts
   (
-   ;;; --- immune system domain ---
-   (why-do-elite-controllers-suppress-HIV . immune-system-is-channel)
-   (immune-system-is-channel . MHC-encodes-peptide-fragments)
-   (MHC-encodes-peptide-fragments . T-cell-decodes-self-vs-foreign)
-   (T-cell-decodes-self-vs-foreign . recognition-is-signal-detection)
-   ;;; --- information theory domain ---
-   (recognition-is-signal-detection . channel-has-capacity-C)
-   (channel-has-capacity-C . noise-is-pathogen-mutation-rate)
-   (noise-is-pathogen-mutation-rate . HIV-mutates-fast-high-noise)
-   (HIV-mutates-fast-high-noise . most-people-C-less-than-noise)
-   ;;; --- HIV domain ---
-   (most-people-C-less-than-noise . also-CD4-is-open-gate)
-   (also-CD4-is-open-gate . gp120-binds-without-authentication)
-   (gp120-binds-without-authentication . virus-enters-and-replicates)
-   ;;; --- elite controller domain ---
-   (virus-enters-and-replicates . but-elite-controllers-have-HLA-B57)
-   (but-elite-controllers-have-HLA-B57 . HLA-B57-presents-conserved-epitopes)
-   (HLA-B57-presents-conserved-epitopes . targets-regions-HIV-cannot-mutate)
-   (targets-regions-HIV-cannot-mutate . effective-noise-reduced)
-   (effective-noise-reduced . channel-capacity-now-exceeds-noise)
-   ;;; --- back to information theory ---
-   (channel-capacity-now-exceeds-noise . Shannon-theorem-applies)
-   (Shannon-theorem-applies . reliable-detection-possible)
-   (reliable-detection-possible . cytotoxic-response-effective)
-   (cytotoxic-response-effective . viral-load-suppressed)
-   (viral-load-suppressed . because-channel-capacity-exceeds-mutation-rate)
-  ))
+
+    ;;; HIV facts
+    (HIV-genome-size (HIV-genome) (9700-base-pairs) ((HIV-genome . 9700-base-pairs)))
+    (HIV-mutation-rate (HIV-replication) (3e-5-per-base-per-cycle) ((HIV-replication . 3e-5-per-base-per-cycle)))
+    (HIV-entry-receptor (HIV-entry) (CD4-receptor) ((HIV-entry . CD4-receptor)))
+    (HIV-coreceptor (gp120-after-CD4) (CCR5-or-CXCR4) ((gp120-after-CD4 . CCR5-or-CXCR4)))
+
+    ;;; Elite controller facts
+    (EC-prevalence (HIV-positive-pop) (1-in-300-are-EC) ((HIV-positive-pop . 1-in-300-are-EC)))
+    (EC-viral-load (elite-controller) (below-50-copies-per-mL) ((elite-controller . below-50-copies-per-mL)))
+    (EC-CD4 (elite-controller-CD4) (above-500-cells-per-uL) ((elite-controller-CD4 . above-500-cells-per-uL)))
+
+    ;;; HLA-B*57 association
+    (HLA-B57-general (HLA-B57-in-gen-pop) (5-to-7-pct) ((HLA-B57-in-gen-pop . 5-to-7-pct)))
+    (HLA-B57-in-EC (HLA-B57-in-controllers) (40-to-85-pct) ((HLA-B57-in-controllers . 40-to-85-pct)))
+    (HLA-B57-enrichment (HLA-B57-odds-ratio) (6x-to-11x) ((HLA-B57-odds-ratio . 6x-to-11x)))
+
+    ;;; Conserved epitope: Gag TW10
+    (TW10-sequence (Gag-TW10) (TSTLQEQIGW) ((Gag-TW10 . TSTLQEQIGW)))
+    (TW10-restriction (TW10) (restricted-by-HLA-B57) ((TW10 . restricted-by-HLA-B57)))
+    (TW10-conserved (TW10-region) (highly-conserved) ((TW10-region . highly-conserved)))
+    (TW10-escape-cost (TW10-escape-mut) (reduces-viral-fitness) ((TW10-escape-mut . reduces-viral-fitness)))
+
+    ;;; Causal mechanism (each step verified)
+    (elite-control-mechanism
+      (HLA-B57-carrier-HIV-positive)
+      (suppressed-without-meds)
+      ((HLA-B57-carrier-HIV-positive . presents-conserved-Gag-epitopes)
+       (presents-conserved-Gag-epitopes . CTL-targets-conserved-regions)
+       (CTL-targets-conserved-regions . escape-mutations-cost-fitness)
+       (escape-mutations-cost-fitness . virus-trapped)
+       (virus-trapped . suppressed-without-meds)))
+
+  )
+
+  ;;; Vacuum tube
+  ((tesla . HIV-elite-control-registered)))
