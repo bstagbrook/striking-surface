@@ -1,9 +1,5 @@
 .PHONY: test lint clean
 
-# documentation.rkt has 3 deliberate CUTs (Discovery 3: three failure modes).
-# All other programs must have zero CUTs.
-EXPECTED_CUTS_documentation := 3
-
 # Time budget per program (seconds). Anything slower is a CUT.
 TIME_BUDGET := 30
 
@@ -33,14 +29,12 @@ test: lint
 	for f in programs/*.rkt; do \
 		out=$$(timeout $(TIME_BUDGET) racket "$$f" 2>&1); \
 		rc=$$?; \
-		base=$$(basename "$$f" .rkt); \
 		if [ $$rc -eq 124 ]; then \
 			echo "  FAIL $$f (exceeded $(TIME_BUDGET)s time budget)"; fail=1; \
 			continue; \
 		fi; \
-		cuts=$$(echo "$$out" | grep -c "CUT" || true); \
-		expected=0; \
-		if [ "$$base" = "documentation" ]; then expected=$(EXPECTED_CUTS_documentation); fi; \
+		cuts=$$(echo "$$out" | grep -c '^  CUT$$' || true); \
+		expected=$$(grep -oP 'expected-cuts:\s*\K[0-9]+' "$$f" || echo 0); \
 		if [ "$$cuts" -ne "$$expected" ]; then \
 			echo "  FAIL $$f ($$cuts CUTs, expected $$expected)"; fail=1; \
 		else \

@@ -11,6 +11,8 @@
 ;;;
 ;;;   Run:  racket programs/documentation.rkt
 ;;;
+;;; expected-cuts: 3
+;;;
 ;;; ═══════════════════════════════════════════════════════════════
 
 (require "../strike.rkt")
