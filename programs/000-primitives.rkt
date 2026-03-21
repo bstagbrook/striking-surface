@@ -9,6 +9,7 @@
 ;;; Transformation: (  (()) (()) (())  ) — three containments
 ;;;
 ;;; This strike table defines itself. The shape IS the definition.
+;;; expected-empty-tubes: 2
 ;;; ═══════════════════════════════════════════════════════════════
 
 (

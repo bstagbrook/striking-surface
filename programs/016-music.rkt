@@ -41,18 +41,15 @@
        (fifth-again-6x . minor-seventh-7x)
        (minor-seventh-7x . harmonic-structure)))
 
-    ;;; Intervals: structural relationships between pitches
-    (intervals
-      (two-pitches)
-      (consonance-or-dissonance)
-      ((unison-1:1 . perfect-consonance)
-       (octave-2:1 . perfect-consonance)
-       (fifth-3:2 . perfect-consonance)
-       (fourth-4:3 . perfect-consonance)
-       (major-third-5:4 . imperfect-consonance)
-       (minor-third-6:5 . imperfect-consonance)
-       (tritone-45:32 . dissonance)
-       (minor-second-16:15 . sharp-dissonance)))
+    ;;; Intervals: one transform per interval, each grounded
+    (interval-unison (unison-1:1) (perfect-consonance) ((unison-1:1 . perfect-consonance)))
+    (interval-octave (octave-2:1) (perfect-consonance) ((octave-2:1 . perfect-consonance)))
+    (interval-fifth (fifth-3:2) (perfect-consonance) ((fifth-3:2 . perfect-consonance)))
+    (interval-fourth (fourth-4:3) (perfect-consonance) ((fourth-4:3 . perfect-consonance)))
+    (interval-maj3 (major-third-5:4) (imperfect-consonance) ((major-third-5:4 . imperfect-consonance)))
+    (interval-min3 (minor-third-6:5) (imperfect-consonance) ((minor-third-6:5 . imperfect-consonance)))
+    (interval-tritone (tritone-45:32) (dissonance) ((tritone-45:32 . dissonance)))
+    (interval-min2 (minor-second-16:15) (sharp-dissonance) ((minor-second-16:15 . sharp-dissonance)))
 
     ;;; Major triad: stack of two thirds
     ;;; Root + major third + minor third = major chord
