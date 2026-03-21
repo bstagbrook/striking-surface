@@ -1,88 +1,235 @@
 #lang strike
 
 ;;; ═══════════════════════════════════════════════════════════════
-;;; NATURAL NUMBERS — PEANO ARITHMETIC ON THE SURFACE
+;;; NATURAL NUMBERS — REAL ARITHMETIC
 ;;;
-;;; Zero:  ()          — presence, nothing contained
-;;; One:   (())        — containment of presence
-;;; Two:   ((()))      — containment of containment
-;;; Three: (((()))) — containment of containment of containment
+;;; Numbers are nesting depth of containment:
+;;;   () = 0, (()) = 1, ((())) = 2, (((()))) = 3, ...
 ;;;
-;;; Depth of nesting IS the number. Not a representation.
-;;; The shape IS the quantity.
+;;; Labels (0, 1, 2...) reference those structural shapes.
+;;; Each arithmetic fact is computed (by Python) and registered.
+;;; From registration forward: O(1). One strike. Forever.
 ;;;
-;;; Successor: wrap in one more containment.
-;;; Predecessor: unwrap one containment.
-;;; Addition: nest the second number inside the first's deepest point.
+;;; This file contains:
+;;;   - Successor: 0→1, 1→2, ..., 19→20
+;;;   - Addition: complete table 0-9 (upper triangle, commutative)
+;;;   - Multiplication: complete table 0-9 (upper triangle)
+;;;   - Squares: 0²-20²
+;;;   - Powers of 2: 2⁰-2¹⁰
+;;;   - Primes under 50
+;;;   - Factorials: 0!-10!
 ;;; ═══════════════════════════════════════════════════════════════
 
-(tesla-powers-natural-numbers
+(tesla-powers-arithmetic
 
   ;;; Source: Tesla
   ((tesla (spark) (power) ((spark . power))))
 
-  ;;; Target: number domain
+  ;;; Target: complete arithmetic register
   (
+    ;;; Successor: n → n+1
+    (succ-0 (0) (1) ((0 . 1)))
+    (succ-1 (1) (2) ((1 . 2)))
+    (succ-2 (2) (3) ((2 . 3)))
+    (succ-3 (3) (4) ((3 . 4)))
+    (succ-4 (4) (5) ((4 . 5)))
+    (succ-5 (5) (6) ((5 . 6)))
+    (succ-6 (6) (7) ((6 . 7)))
+    (succ-7 (7) (8) ((7 . 8)))
+    (succ-8 (8) (9) ((8 . 9)))
+    (succ-9 (9) (10) ((9 . 10)))
+    (succ-10 (10) (11) ((10 . 11)))
+    (succ-11 (11) (12) ((11 . 12)))
+    (succ-12 (12) (13) ((12 . 13)))
+    (succ-13 (13) (14) ((13 . 14)))
+    (succ-14 (14) (15) ((14 . 15)))
+    (succ-15 (15) (16) ((15 . 16)))
+    (succ-16 (16) (17) ((16 . 17)))
+    (succ-17 (17) (18) ((17 . 18)))
+    (succ-18 (18) (19) ((18 . 19)))
+    (succ-19 (19) (20) ((19 . 20)))
 
-    ;;; The numbers themselves — shapes, not symbols
-    (zero
-      (nothing)
-      (quantity-0)
-      ((nothing . quantity-0)))
+    ;;; Addition (commutative — upper triangle)
+    (add-0-0 (0+0) (0) ((0+0 . 0)))
+    (add-0-1 (0+1) (1) ((0+1 . 1)))
+    (add-0-2 (0+2) (2) ((0+2 . 2)))
+    (add-0-3 (0+3) (3) ((0+3 . 3)))
+    (add-0-4 (0+4) (4) ((0+4 . 4)))
+    (add-0-5 (0+5) (5) ((0+5 . 5)))
+    (add-0-6 (0+6) (6) ((0+6 . 6)))
+    (add-0-7 (0+7) (7) ((0+7 . 7)))
+    (add-0-8 (0+8) (8) ((0+8 . 8)))
+    (add-0-9 (0+9) (9) ((0+9 . 9)))
+    (add-1-1 (1+1) (2) ((1+1 . 2)))
+    (add-1-2 (1+2) (3) ((1+2 . 3)))
+    (add-1-3 (1+3) (4) ((1+3 . 4)))
+    (add-1-4 (1+4) (5) ((1+4 . 5)))
+    (add-1-5 (1+5) (6) ((1+5 . 6)))
+    (add-1-6 (1+6) (7) ((1+6 . 7)))
+    (add-1-7 (1+7) (8) ((1+7 . 8)))
+    (add-1-8 (1+8) (9) ((1+8 . 9)))
+    (add-1-9 (1+9) (10) ((1+9 . 10)))
+    (add-2-2 (2+2) (4) ((2+2 . 4)))
+    (add-2-3 (2+3) (5) ((2+3 . 5)))
+    (add-2-4 (2+4) (6) ((2+4 . 6)))
+    (add-2-5 (2+5) (7) ((2+5 . 7)))
+    (add-2-6 (2+6) (8) ((2+6 . 8)))
+    (add-2-7 (2+7) (9) ((2+7 . 9)))
+    (add-2-8 (2+8) (10) ((2+8 . 10)))
+    (add-2-9 (2+9) (11) ((2+9 . 11)))
+    (add-3-3 (3+3) (6) ((3+3 . 6)))
+    (add-3-4 (3+4) (7) ((3+4 . 7)))
+    (add-3-5 (3+5) (8) ((3+5 . 8)))
+    (add-3-6 (3+6) (9) ((3+6 . 9)))
+    (add-3-7 (3+7) (10) ((3+7 . 10)))
+    (add-3-8 (3+8) (11) ((3+8 . 11)))
+    (add-3-9 (3+9) (12) ((3+9 . 12)))
+    (add-4-4 (4+4) (8) ((4+4 . 8)))
+    (add-4-5 (4+5) (9) ((4+5 . 9)))
+    (add-4-6 (4+6) (10) ((4+6 . 10)))
+    (add-4-7 (4+7) (11) ((4+7 . 11)))
+    (add-4-8 (4+8) (12) ((4+8 . 12)))
+    (add-4-9 (4+9) (13) ((4+9 . 13)))
+    (add-5-5 (5+5) (10) ((5+5 . 10)))
+    (add-5-6 (5+6) (11) ((5+6 . 11)))
+    (add-5-7 (5+7) (12) ((5+7 . 12)))
+    (add-5-8 (5+8) (13) ((5+8 . 13)))
+    (add-5-9 (5+9) (14) ((5+9 . 14)))
+    (add-6-6 (6+6) (12) ((6+6 . 12)))
+    (add-6-7 (6+7) (13) ((6+7 . 13)))
+    (add-6-8 (6+8) (14) ((6+8 . 14)))
+    (add-6-9 (6+9) (15) ((6+9 . 15)))
+    (add-7-7 (7+7) (14) ((7+7 . 14)))
+    (add-7-8 (7+8) (15) ((7+8 . 15)))
+    (add-7-9 (7+9) (16) ((7+9 . 16)))
+    (add-8-8 (8+8) (16) ((8+8 . 16)))
+    (add-8-9 (8+9) (17) ((8+9 . 17)))
+    (add-9-9 (9+9) (18) ((9+9 . 18)))
 
-    (one
-      (containment-of-nothing)
-      (quantity-1)
-      ((containment-of-nothing . quantity-1)))
+    ;;; Multiplication (commutative — upper triangle)
+    (mul-0-0 (0*0) (0) ((0*0 . 0)))
+    (mul-0-1 (0*1) (0) ((0*1 . 0)))
+    (mul-0-2 (0*2) (0) ((0*2 . 0)))
+    (mul-0-3 (0*3) (0) ((0*3 . 0)))
+    (mul-0-4 (0*4) (0) ((0*4 . 0)))
+    (mul-0-5 (0*5) (0) ((0*5 . 0)))
+    (mul-0-6 (0*6) (0) ((0*6 . 0)))
+    (mul-0-7 (0*7) (0) ((0*7 . 0)))
+    (mul-0-8 (0*8) (0) ((0*8 . 0)))
+    (mul-0-9 (0*9) (0) ((0*9 . 0)))
+    (mul-1-1 (1*1) (1) ((1*1 . 1)))
+    (mul-1-2 (1*2) (2) ((1*2 . 2)))
+    (mul-1-3 (1*3) (3) ((1*3 . 3)))
+    (mul-1-4 (1*4) (4) ((1*4 . 4)))
+    (mul-1-5 (1*5) (5) ((1*5 . 5)))
+    (mul-1-6 (1*6) (6) ((1*6 . 6)))
+    (mul-1-7 (1*7) (7) ((1*7 . 7)))
+    (mul-1-8 (1*8) (8) ((1*8 . 8)))
+    (mul-1-9 (1*9) (9) ((1*9 . 9)))
+    (mul-2-2 (2*2) (4) ((2*2 . 4)))
+    (mul-2-3 (2*3) (6) ((2*3 . 6)))
+    (mul-2-4 (2*4) (8) ((2*4 . 8)))
+    (mul-2-5 (2*5) (10) ((2*5 . 10)))
+    (mul-2-6 (2*6) (12) ((2*6 . 12)))
+    (mul-2-7 (2*7) (14) ((2*7 . 14)))
+    (mul-2-8 (2*8) (16) ((2*8 . 16)))
+    (mul-2-9 (2*9) (18) ((2*9 . 18)))
+    (mul-3-3 (3*3) (9) ((3*3 . 9)))
+    (mul-3-4 (3*4) (12) ((3*4 . 12)))
+    (mul-3-5 (3*5) (15) ((3*5 . 15)))
+    (mul-3-6 (3*6) (18) ((3*6 . 18)))
+    (mul-3-7 (3*7) (21) ((3*7 . 21)))
+    (mul-3-8 (3*8) (24) ((3*8 . 24)))
+    (mul-3-9 (3*9) (27) ((3*9 . 27)))
+    (mul-4-4 (4*4) (16) ((4*4 . 16)))
+    (mul-4-5 (4*5) (20) ((4*5 . 20)))
+    (mul-4-6 (4*6) (24) ((4*6 . 24)))
+    (mul-4-7 (4*7) (28) ((4*7 . 28)))
+    (mul-4-8 (4*8) (32) ((4*8 . 32)))
+    (mul-4-9 (4*9) (36) ((4*9 . 36)))
+    (mul-5-5 (5*5) (25) ((5*5 . 25)))
+    (mul-5-6 (5*6) (30) ((5*6 . 30)))
+    (mul-5-7 (5*7) (35) ((5*7 . 35)))
+    (mul-5-8 (5*8) (40) ((5*8 . 40)))
+    (mul-5-9 (5*9) (45) ((5*9 . 45)))
+    (mul-6-6 (6*6) (36) ((6*6 . 36)))
+    (mul-6-7 (6*7) (42) ((6*7 . 42)))
+    (mul-6-8 (6*8) (48) ((6*8 . 48)))
+    (mul-6-9 (6*9) (54) ((6*9 . 54)))
+    (mul-7-7 (7*7) (49) ((7*7 . 49)))
+    (mul-7-8 (7*8) (56) ((7*8 . 56)))
+    (mul-7-9 (7*9) (63) ((7*9 . 63)))
+    (mul-8-8 (8*8) (64) ((8*8 . 64)))
+    (mul-8-9 (8*9) (72) ((8*9 . 72)))
+    (mul-9-9 (9*9) (81) ((9*9 . 81)))
 
-    (two
-      (containment-of-one)
-      (quantity-2)
-      ((containment-of-one . quantity-2)))
+    ;;; Squares
+    (sq-0 (0^2) (0) ((0^2 . 0)))
+    (sq-1 (1^2) (1) ((1^2 . 1)))
+    (sq-2 (2^2) (4) ((2^2 . 4)))
+    (sq-3 (3^2) (9) ((3^2 . 9)))
+    (sq-4 (4^2) (16) ((4^2 . 16)))
+    (sq-5 (5^2) (25) ((5^2 . 25)))
+    (sq-6 (6^2) (36) ((6^2 . 36)))
+    (sq-7 (7^2) (49) ((7^2 . 49)))
+    (sq-8 (8^2) (64) ((8^2 . 64)))
+    (sq-9 (9^2) (81) ((9^2 . 81)))
+    (sq-10 (10^2) (100) ((10^2 . 100)))
+    (sq-11 (11^2) (121) ((11^2 . 121)))
+    (sq-12 (12^2) (144) ((12^2 . 144)))
+    (sq-13 (13^2) (169) ((13^2 . 169)))
+    (sq-14 (14^2) (196) ((14^2 . 196)))
+    (sq-15 (15^2) (225) ((15^2 . 225)))
+    (sq-16 (16^2) (256) ((16^2 . 256)))
+    (sq-17 (17^2) (289) ((17^2 . 289)))
+    (sq-18 (18^2) (324) ((18^2 . 324)))
+    (sq-19 (19^2) (361) ((19^2 . 361)))
+    (sq-20 (20^2) (400) ((20^2 . 400)))
 
-    ;;; Successor transform: n → n+1
-    ;;; Wrapping = adding one level of containment
-    (successor
-      (any-number-n)
-      (number-n+1)
-      ((any-number-n . wrap-in-containment)
-       (wrap-in-containment . number-n+1)))
+    ;;; Powers of 2
+    (pow2-0 (2^0) (1) ((2^0 . 1)))
+    (pow2-1 (2^1) (2) ((2^1 . 2)))
+    (pow2-2 (2^2) (4) ((2^2 . 4)))
+    (pow2-3 (2^3) (8) ((2^3 . 8)))
+    (pow2-4 (2^4) (16) ((2^4 . 16)))
+    (pow2-5 (2^5) (32) ((2^5 . 32)))
+    (pow2-6 (2^6) (64) ((2^6 . 64)))
+    (pow2-7 (2^7) (128) ((2^7 . 128)))
+    (pow2-8 (2^8) (256) ((2^8 . 256)))
+    (pow2-9 (2^9) (512) ((2^9 . 512)))
+    (pow2-10 (2^10) (1024) ((2^10 . 1024)))
 
-    ;;; Predecessor transform: n → n-1 (for n > 0)
-    ;;; Unwrapping = removing one level of containment
-    (predecessor
-      (any-number-n>0)
-      (number-n-1)
-      ((any-number-n>0 . unwrap-one-containment)
-       (unwrap-one-containment . number-n-1)))
+    ;;; Primes under 50
+    (prime-2 (2) (prime) ((2 . prime)))
+    (prime-3 (3) (prime) ((3 . prime)))
+    (prime-5 (5) (prime) ((5 . prime)))
+    (prime-7 (7) (prime) ((7 . prime)))
+    (prime-11 (11) (prime) ((11 . prime)))
+    (prime-13 (13) (prime) ((13 . prime)))
+    (prime-17 (17) (prime) ((17 . prime)))
+    (prime-19 (19) (prime) ((19 . prime)))
+    (prime-23 (23) (prime) ((23 . prime)))
+    (prime-29 (29) (prime) ((29 . prime)))
+    (prime-31 (31) (prime) ((31 . prime)))
+    (prime-37 (37) (prime) ((37 . prime)))
+    (prime-41 (41) (prime) ((41 . prime)))
+    (prime-43 (43) (prime) ((43 . prime)))
+    (prime-47 (47) (prime) ((47 . prime)))
 
-    ;;; Addition: structural merge
-    ;;; 2 + 3 = nest 3 inside 2's deepest point = depth 5
-    (addition
-      (two-numbers-a-b)
-      (sum-depth-a+b)
-      ((two-numbers-a-b . find-deepest-of-a)
-       (find-deepest-of-a . graft-b-at-depth)
-       (graft-b-at-depth . sum-depth-a+b)))
-
-    ;;; Multiplication: repeated structural merge
-    ;;; 2 × 3 = three copies of depth-2, nested
-    (multiplication
-      (two-numbers-a-b)
-      (product-depth-a*b)
-      ((two-numbers-a-b . replicate-a-structure-b-times)
-       (replicate-a-structure-b-times . nest-replicas)
-       (nest-replicas . product-depth-a*b)))
-
-    ;;; Equality: structural comparison
-    ;;; Two numbers equal iff same nesting depth
-    (equality
-      (two-numbers)
-      (same-depth-or-not)
-      ((two-numbers . compare-nesting-depth)
-       (compare-nesting-depth . same-depth-or-not)))
+    ;;; Factorials
+    (fact-0 (0!) (1) ((0! . 1)))
+    (fact-1 (1!) (1) ((1! . 1)))
+    (fact-2 (2!) (2) ((2! . 2)))
+    (fact-3 (3!) (6) ((3! . 6)))
+    (fact-4 (4!) (24) ((4! . 24)))
+    (fact-5 (5!) (120) ((5! . 120)))
+    (fact-6 (6!) (720) ((6! . 720)))
+    (fact-7 (7!) (5040) ((7! . 5040)))
+    (fact-8 (8!) (40320) ((8! . 40320)))
+    (fact-9 (9!) (362880) ((9! . 362880)))
+    (fact-10 (10!) (3628800) ((10! . 3628800)))
 
   )
 
   ;;; Vacuum tube
-  ((tesla . numbers-registered)))
+  ((tesla . arithmetic-registered)))
