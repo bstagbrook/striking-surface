@@ -37,7 +37,7 @@
 
 (provide (rename-out [strike-module-begin #%module-begin])
          #%app #%datum #%top
-         resolve ->str)
+         resolve quantum-resolve quantum-trace ->str)
 
 ;;; ─── ->str ─────────────────────────────────────────────────
 ;;; Shape to string for trace key matching.
