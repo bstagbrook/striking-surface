@@ -1,8 +1,9 @@
 # Constraint-Shaped Information in Biological Systems
 ## A Unified Channel Model of Immune Recognition, Cancer Immunotherapy, and Genetic Code Error Correction
 
-**Bruce Stagbrook¹**
-¹ Stagbrook Tech, San Francisco, CA
+**Bruce Stagbrook**
+San Francisco, CA
+Correspondence: bstagbrook@gmail.com
 
 ---
 
@@ -117,11 +118,11 @@ Non-factorizable interactions: fitness(A + B) ≠ fitness(A) × fitness(B)
 
 Prediction: High CAI, low κ, strong epistasis
 
-### 6.2 Cancer
+### 6.2 Cancer (Prediction — Not Yet Tested)
 - Driver mutations and associated neoantigens are constrained
-- Immune response targets driver neoantigens rather than passenger mutations
+- Immune response targets driver neoantigens rather than passenger mutations (ASCO, 2025; Frontiers in Immunology, 2025)
 
-Prediction: CAI predicts immunotherapy success better than total mutation burden
+Prediction: CAI computed over driver-neoantigen positions predicts immunotherapy response better than total mutation burden. This prediction has not been tested in this study and requires cancer sequencing data with matched clinical outcomes.
 
 ### 6.3 Genetic Code
 - Degeneracy absorbs mutations at wobble positions
@@ -136,9 +137,9 @@ Duality:
 ## 7. Quantitative Framework
 
 ### 7.1 Data Sources
-- HIV-1 Gag sequences: LANL HIV Sequence Database
-- Reference alignment: subtype B Gag multiple sequence alignment
-- Epitope annotations: Pymm et al., 2022
+- HIV-1 Gag polyprotein sequences: NCBI Protein database (500 retrieved, 390 retained after subtype B filtering)
+- Subtype B proxy: sequences retaining TW10 consensus motif (TSTLQEQIGW)
+- Epitope annotations: HLA-B*57 (Pymm et al., 2022), HLA-B*27 KK10 (Schneidewind et al., 2007), HLA-A*02 SL9 and HLA-A*03 RK9 (standard reference epitopes)
 
 ### 7.2 Preprocessing
 1. Remove sequences with >10% gaps
@@ -189,13 +190,27 @@ Protective alleles (B*57, B*27) target conserved positions. Non-protective allel
 
     B*57 (2.07x) > B*27 (1.48x) > background (1.00x) > A*02 (0.54x) > A*03 (0.00x)
 
-### 8.4 Convergence Across Methods
+### 8.4 Bootstrap Validation (1000 resamples)
+
+| Metric | Value |
+|--------|-------|
+| Mean entropy reduction | 84.7% |
+| 95% CI | 80.1% — 89.7% |
+| Fraction p < 0.05 | 100.0% |
+| Fraction p < 0.01 | 100.0% |
+| Fraction p < 0.001 | 100.0% |
+
+The entropy reduction is robust to resampling. All 1000 bootstrap replicates produced significant results at p < 0.001.
+
+### 8.5 Convergence Across Methods
 
 | Method | B*57 entropy reduction | Source |
 |--------|----------------------|--------|
 | Regional approximation | 33% | This study (N=200, mixed subtypes) |
 | Brumme et al. 2008 | ~46% | Published (N>1800, genome-wide significant) |
 | Subtype B filtered | 85% | This study (N=390, subtype B) |
+
+Three independent estimates converge on 33–85% entropy reduction, with the variation attributable to subtype filtering stringency.
 
 ---
 
@@ -228,28 +243,29 @@ Protective alleles (B*57, B*27) target conserved positions. Non-protective allel
 ## 11. Methods
 
 ### 11.1 Sequence Acquisition
-500 HIV-1 Gag polyprotein sequences retrieved from NCBI Protein database. Filtered to 390 subtype B sequences (proxy: retention of TW10 consensus motif TSTLQEQIGW).
+500 HIV-1 Gag polyprotein sequences retrieved from NCBI Protein database via BioPython Entrez API. Filtered to 390 subtype B sequences using TW10 consensus motif (TSTLQEQIGW) as a subtype proxy.
 
 ### 11.2 Alignment
-MAFFT (--auto mode). Epitope positions mapped by motif search against aligned sequences (IW9=175, KF11=190, TW10=268 in alignment coordinates).
+MAFFT v7 (--auto mode). Epitope positions mapped by motif search against the first 50 aligned sequences, using median alignment position across matches. Mapped positions: IW9 (ISPRTLNAW) at alignment position 156–164, KF11 (KAFSPEVIPMF) at 171–181, TW10 (TSTLQEQIGW) at 249–258, KK10 (KRWIILGLNK) at 272–281, SL9 (SLYNTVATL) at 76–84.
 
 ### 11.3 Entropy and MI
-Per-position Shannon entropy computed from amino acid frequency distributions. Pairwise MI computed for epitope positions and random background pairs.
+Per-position Shannon entropy computed from amino acid frequency distributions (gaps and ambiguous residues excluded). Pairwise MI computed for all epitope position pairs and an equal number of random background pairs (seed=42).
 
 ### 11.4 CAI Computation
-Constraint score per position: C_i = (1/(H_i + ε)) · (1 + Σ_j MI_ij). CAI = Σ E_i · C_i.
+Constraint score per position: C_i = (1/(H_i + ε)) · (1 + Σ_j MI_ij), where ε = 10⁻⁶. CAI = Σ E_i · C_i. Background CAI computed as mean C_i over non-epitope positions, scaled to equivalent epitope count.
 
-### 11.5 Statistical Analysis
-Mann-Whitney U test (one-sided) for entropy comparison. Analysis assisted by large language models.
+### 11.5 Bootstrap
+1000 bootstrap resamples of the full alignment. Per-position entropy and Mann-Whitney U test computed for each resample. 95% confidence interval for entropy reduction derived from bootstrap distribution.
+
+### 11.6 Statistical Analysis
+Mann-Whitney U test (one-sided, epitope < non-epitope) for entropy comparison. Bootstrap validation for confidence intervals. All analyses performed using Python 3, BioPython, SciPy, and NumPy. Analysis workflow assisted by large language models. Code and data available at github.com/bstagbrook/striking-surface.
 
 ---
 
-## 12. Figures (Placeholders)
-- Figure 1: Entropy distribution at B*57 epitope vs non-epitope positions
-- Figure 2: Per-epitope entropy (TW10, KF11, IW9)
-- Figure 3: CAI comparison across HLA alleles
-- Figure 4: Escape topology schematic for TW10
-- Figure 5: Constrained channel principle across three domains
+## 12. Figures
+
+- **Figure 1** (figure1_cai_comparison.png): Three-panel figure. (A) CAI ratio across HLA alleles showing B*57 > B*27 > background > A*02 > A*03. (B) Epitope vs background entropy for each allele with p-values. (C) Per-epitope conservation (TW10, KF11, IW9, KK10, SL9).
+- **Figure 2** (figure2_schematic.png): Constrained channel model schematic showing state space, viability constraint, constrained region anchoring, and the CAI formula.
 
 ---
 
@@ -273,5 +289,8 @@ Biological systems achieve reliability by anchoring information to constrained r
 - Schneider, T. D. (2010). Molecular Information Theory. *Nano Communication Networks*, 1(3), 173-180.
 - Barbieri, M. (2019). Information in Biology. *BioSystems*, 185, 104023.
 - Hutchison, C. A. et al. (2016). Minimal Genome. *Science*, 351(6280), aad6253.
+- Schneidewind, A. et al. (2007). Escape from the Dominant HLA-B27-Restricted CTL Response in Gag Is Associated with a Dramatic Reduction in HIV-1 Replication. *Journal of Virology*, 81(22), 12382-12393.
+- Brumme, Z. L. et al. (2008). HLA-Associated Immune Escape Pathways in HIV-1 Subtype B Gag, Pol and Nef Proteins. *PLoS ONE*, 4(8), e6687.
+- Pereyra, F. et al. (2010). The Major Genetic Determinants of HIV-1 Control Affect HLA Class I Peptide Presentation. *Science*, 330(6010), 1551-1557.
 - Frontiers in Immunology (2025). Neoantigen Prediction.
 - ASCO Educational Book (2025). Immunotherapy Adaptation.
