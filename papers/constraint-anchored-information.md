@@ -202,15 +202,27 @@ Protective alleles (B*57, B*27) target conserved positions. Non-protective allel
 
 The entropy reduction is robust to resampling. All 1000 bootstrap replicates produced significant results at p < 0.001.
 
-### 8.5 Convergence Across Methods
+### 8.5 Bias Check and Unbiased Estimate
 
-| Method | B*57 entropy reduction | Source |
-|--------|----------------------|--------|
-| Regional approximation | 33% | This study (N=200, mixed subtypes) |
-| Brumme et al. 2008 | ~46% | Published (N>1800, genome-wide significant) |
-| Subtype B filtered | 85% | This study (N=390, subtype B) |
+The subtype B filtering used TW10 consensus motif (TSTLQEQIGW) as a proxy, which renders TW10 entropy = 0 by construction. To avoid circularity, we computed entropy reduction using only KF11 and IW9 epitopes (not used in the filter):
 
-Three independent estimates converge on 33–85% entropy reduction, with the variation attributable to subtype filtering stringency.
+| Dataset | Epitopes used | Epitope H | Background H | Reduction |
+|---------|--------------|----------|-------------|-----------|
+| Unfiltered (N=500) | KF11 + IW9 only | 0.097 | 0.269 | 64.2% |
+| Filtered (N=390) | KF11 + IW9 only | 0.038 | 0.170 | 77.6% |
+| Filtered (N=390) | All three (includes biased TW10) | 0.025 | 0.170 | 85.0% |
+
+The unbiased estimate (KF11 + IW9 only, unfiltered) shows **64% entropy reduction** with no circular reasoning. This is the conservative, defensible number.
+
+### 8.6 Convergence Across Methods
+
+| Method | B*57 entropy reduction | Source | Note |
+|--------|----------------------|--------|------|
+| KF11+IW9 unbiased | 64% | This study (N=500) | No filtering bias |
+| Brumme et al. 2008 | ~46% | Published (N>1800) | Genome-wide significant |
+| All three, filtered | 85% | This study (N=390) | Includes TW10 filter bias |
+
+Conservative estimate: 46–64% entropy reduction at B*57 epitope positions.
 
 ---
 
