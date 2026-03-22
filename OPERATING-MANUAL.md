@@ -31,3 +31,55 @@ Each registration captures: structural constraints, domain assumptions, dependen
 ## Key Principle
 
 The system resists unregistered changes (immune authentication). Propagates only what is intentional and documented. Maintains self-awareness of uncertainty at every level.
+
+---
+
+## Structural Cheat Sheet
+
+### Primitive State
+State is primitive. Model presence explicitly. Keep state isolated and observable.
+
+### Registration Surfaces
+- Interface Surface: input/output, constraints, side effects
+- Expression Surface: functional behavior, derived state
+- Domain Surface: impact on system-level state
+
+### Transformation Mapping
+- Function signatures explicitly defined
+- Residue propagation tracked across depths (0→N)
+- Lattice-based approach for depth and dependency management
+
+### Information Flow (Shannon)
+- Quantify uncertainty after transformations
+- Track signal vs noise across surfaces
+- Predict state outcomes through information propagation
+
+### System Immunity
+- Validate all incoming changes against registration surfaces
+- Residues must be visible, trackable, auditable
+- Reject unregistered transformations; flag unexpected residuals
+
+### Recursive Decomposition
+- Zoom in: break nodes into subnodes
+- Zoom out: collapse completed nodes
+- Maintain full context; never drop viable paths
+
+### Quantum-Ready Design
+- Primitives support probabilistic states and superposition
+- Complete classical registration before quantum optimization
+- Keep full machine context intact
+
+### Complete Work
+- Model domain fully
+- Register all transformations and residues
+- Preserve optional paths
+- Gaps are signals, not errors
+
+### Implementation
+- S-expression or labeled structures for clarity
+- Residue maps and lattice depths maintained
+- Formalize interfaces before implementation
+- Incrementally update; preserve prior states
+
+### Core
+Build a fully traceable, immune-aware, information-sensitive system where transformations are explicit, residues tracked, and optionality preserved.
