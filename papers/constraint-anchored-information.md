@@ -155,34 +155,47 @@ Duality:
 
 ## 8. Results
 
-### 8.1 Entropy Reduction at B*57 Epitopes (N=390, subtype B)
+### 8.1 Multi-Allele Entropy Comparison (N=390, subtype B)
 
-| Allele | Epitope entropy | Background entropy | Reduction | p-value |
-|--------|----------------|-----------------|-----------|---------|
-| B*57   | 0.025          | 0.170           | 85.0%     | 0.000016 |
-| A*02   | 0.289          | 0.160           | -80.9%    | 0.927   |
+| Allele | Clinical protection | Epitope H | Background H | Reduction | p-value |
+|--------|-------------------|----------|-------------|-----------|---------|
+| B*57   | Strongest          | 0.025    | 0.170       | 85.0%     | 0.000016 |
+| B*27   | Strong             | 0.048    | 0.164       | 70.9%     | 0.125   |
+| A*02   | None               | 0.289    | 0.160       | -80.9%    | 0.927   |
+| A*03   | None               | 0.211    | 0.161       | -30.9%    | 0.959   |
+
+Protective alleles (B*57, B*27) target conserved positions. Non-protective alleles (A*02, A*03) target variable positions.
 
 ### 8.2 Per-Epitope Entropy
 
-| Epitope | Entropy | Note |
-|---------|---------|------|
-| TW10    | 0.000   | Invariant in subtype B (first to escape under pressure) |
-| KF11    | 0.019   | Most constrained |
-| IW9     | 0.062   | Moderately constrained |
+| Epitope | HLA | Entropy | Note |
+|---------|-----|---------|------|
+| TW10    | B*57 | 0.000  | Invariant in subtype B; first to escape under pressure |
+| KF11    | B*57 | 0.019  | Most constrained; escape reverts without pressure |
+| IW9     | B*57 | 0.062  | Moderately constrained |
+| KK10    | B*27 | 0.048  | Conserved; escape associated with AIDS progression |
+| SL9     | A*02 | 0.289  | Variable; immunodominant but not protective |
 
-### 8.3 Convergence Across Methods
+### 8.3 CAI Ranking Across HLA Alleles
 
-| Method | Entropy reduction | Source |
-|--------|------------------|--------|
-| Regional approximation | 33% | This study (N=200, mixed) |
-| Brumme et al. 2008 | ~46% | Published (N>1800) |
-| Subtype B filtered | 85% | This study (N=390) |
+| Allele | CAI/position | Background | Ratio | Clinical protection |
+|--------|-------------|-----------|-------|-------------------|
+| B*57   | 800,004     | 386,148   | 2.07x | Strongest |
+| B*27   | 600,005     | 405,723   | 1.48x | Strong |
+| A*02   | 222,230     | 412,557   | 0.54x | None |
+| A*03   | 21          | 416,359   | 0.00x | None |
 
-### 8.4 CAI
+**CAI ranking matches clinical protection hierarchy exactly:**
 
-| Allele | CAI/position | Ratio vs background |
-|--------|-------------|-------------------|
-| B*57   | 333,342     | 1.12x             |
+    B*57 (2.07x) > B*27 (1.48x) > background (1.00x) > A*02 (0.54x) > A*03 (0.00x)
+
+### 8.4 Convergence Across Methods
+
+| Method | B*57 entropy reduction | Source |
+|--------|----------------------|--------|
+| Regional approximation | 33% | This study (N=200, mixed subtypes) |
+| Brumme et al. 2008 | ~46% | Published (N>1800, genome-wide significant) |
+| Subtype B filtered | 85% | This study (N=390, subtype B) |
 
 ---
 
