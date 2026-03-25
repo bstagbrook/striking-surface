@@ -119,7 +119,7 @@ def main():
             q = input("  you: ").strip()
             if not q: continue
             print()
-            results = ask(q)
+            results = ask_full(q)
             for r in results:
                 if r == "CUT":
                     print(f"  CUT")
@@ -129,6 +129,189 @@ def main():
         except (KeyboardInterrupt, EOFError):
             print()
             break
+
+
+
+# ═══════════════════════════════════════════════════════════
+# CAPACITY 5: RESPONSE COMPOSITION — trace chains → english
+# ═══════════════════════════════════════════════════════════
+
+def compose_english(traces):
+    """Trace chains → Meet-n-Greet sentences."""
+    sentences = []
+    for chain in traces:
+        if len(chain) < 3: continue
+        subject = chain[0].replace('-', ' ')
+        conclusion = chain[-1].replace('-', ' ')
+        because = ', because '.join(atom.replace('-', ' ') for atom in chain[1:-1])
+        sentences.append(f"As {subject}: {because}, therefore {conclusion}.")
+    return sentences
+
+# ═══════════════════════════════════════════════════════════
+# CAPACITY 6: FIELD EXTENSION — CUT → web → learn → answer
+# ═══════════════════════════════════════════════════════════
+
+def field_extend(terms):
+    """When body CUTs, reach into the field. Returns new pairs."""
+    import urllib.request, urllib.parse
+    try:
+        query_str = '+'.join(terms)
+        # Use DuckDuckGo instant answer API — no key needed
+        url = f"https://api.duckduckgo.com/?q={urllib.parse.quote(query_str)}&format=json&no_html=1"
+        req = urllib.request.Request(url, headers={'User-Agent': 'RIVIR/1.0'})
+        resp = urllib.request.urlopen(req, timeout=5)
+        data = json.loads(resp.read())
+
+        new_pairs = []
+        # Abstract
+        if data.get('Abstract'):
+            words = data['Abstract'].split('.')
+            for i in range(len(words)-1):
+                k = re.sub(r'[^a-zA-Z0-9]+', '-', words[i].strip()).strip('-')[:60].lower()
+                v = re.sub(r'[^a-zA-Z0-9]+', '-', words[i+1].strip()).strip('-')[:60].lower()
+                if k and v and len(k) > 3 and len(v) > 3:
+                    new_pairs.append((k, v))
+
+        # Related topics
+        for topic in data.get('RelatedTopics', [])[:5]:
+            if isinstance(topic, dict) and topic.get('Text'):
+                text = topic['Text']
+                k = re.sub(r'[^a-zA-Z0-9]+', '-', text[:60]).strip('-').lower()
+                v = re.sub(r'[^a-zA-Z0-9]+', '-', text[60:120]).strip('-').lower()
+                if k and v and len(k) > 3 and len(v) > 3:
+                    new_pairs.append((k, v))
+
+        return new_pairs
+    except:
+        return []
+
+def register_pairs(pairs, source_name):
+    """Register new pairs into a receipt file."""
+    if not pairs: return
+    filename = os.path.join(BODY_DIR, 'programs', f'receipt-{source_name}.rkt')
+    lines = ['#lang strike', '', f';;; Receipt from field extension: {source_name}', '',
+             f'(receipt-{source_name}',
+             f'  ((field ({source_name}) (registered) (({source_name} . registered))))',
+             '  (']
+    for k, v in pairs[:20]:
+        lines.append(f'    ({k} ({k}) ({v}) (({k} . {v})))')
+    lines.append('  )')
+    lines.append(f'  ((field . receipt-{source_name}-registered)))')
+    with open(filename, 'w') as f:
+        f.write('\n'.join(lines))
+    # Update index
+    for k, v in pairs:
+        label = k.split('-')[0] if '-' in k else k
+        if label not in INDEX: INDEX[label] = []
+        INDEX[label].append(filename)
+
+# ═══════════════════════════════════════════════════════════
+# CAPACITY 7: RECEIPT REGISTRATION — interactions → permanent
+# ═══════════════════════════════════════════════════════════
+
+RECEIPT_LOG = os.path.join(BODY_DIR, 'programs', 'receipts.log')
+
+def register_receipt(query, response_traces):
+    """Log every interaction as a receipt."""
+    import datetime
+    timestamp = datetime.datetime.now().isoformat()
+    with open(RECEIPT_LOG, 'a') as f:
+        q_atom = re.sub(r'[^a-z0-9]+', '-', query.lower()).strip('-')[:60]
+        r_atom = response_traces[0][:60].replace(' → ', '-to-') if response_traces else 'CUT'
+        f.write(f"{timestamp}\t{q_atom}\t{r_atom}\n")
+
+# ═══════════════════════════════════════════════════════════
+# CAPACITY 8: SATISFACTION SCORING
+# ═══════════════════════════════════════════════════════════
+
+LAST_TOPIC = [None]
+
+def score_satisfaction(query, traces):
+    """Track whether topics continue or change."""
+    q_atom = re.sub(r'[^a-z0-9]+', '-', query.lower()).strip('-')
+    topic = q_atom.split('-')[0] if '-' in q_atom else q_atom
+    if LAST_TOPIC[0] and LAST_TOPIC[0] == topic:
+        satisfaction = 'circuit-open'  # same topic, still seeking
+    elif LAST_TOPIC[0] and LAST_TOPIC[0] != topic:
+        satisfaction = 'circuit-closed'  # topic changed, prior satisfied
+    else:
+        satisfaction = 'first-query'
+    LAST_TOPIC[0] = topic
+    return satisfaction
+
+# ═══════════════════════════════════════════════════════════
+# CAPACITY 10: DESIRE TRACKING
+# ═══════════════════════════════════════════════════════════
+
+TOPIC_COUNTS = {}
+
+def track_desire(query):
+    """Track topic frequency. Frequent = deep desire."""
+    terms = tokenize(query)
+    for t in terms:
+        TOPIC_COUNTS[t] = TOPIC_COUNTS.get(t, 0) + 1
+
+def desire_boost(terms):
+    """Boost routing for frequently asked topics."""
+    boosted = sorted(terms, key=lambda t: TOPIC_COUNTS.get(t, 0), reverse=True)
+    return boosted
+
+# ═══════════════════════════════════════════════════════════
+# UPGRADED ASK — all 10 capacities integrated
+# ═══════════════════════════════════════════════════════════
+
+def ask_full(query):
+    # Track desire
+    track_desire(query)
+
+    # Tokenize with desire boost
+    terms = tokenize(query)
+    terms = desire_boost(terms)
+    if not terms: return ["CUT"]
+
+    # Route
+    files = route(terms)
+    if not files:
+        # Field extension — reach into the internet
+        new_pairs = field_extend(terms)
+        if new_pairs:
+            source = re.sub(r'[^a-z0-9]+', '-', query.lower()).strip('-')[:30]
+            register_pairs(new_pairs, source)
+            files = route(terms)  # retry with new shapes
+
+    if not files: return ["CUT"]
+
+    # Strike and trace
+    all_traces = []
+    for f in files:
+        output = strike(f)
+        if output:
+            traces = trace_in_output(output, terms)
+            all_traces.extend(traces)
+
+    all_traces.sort(key=len, reverse=True)
+    raw = [' → '.join(t) for t in all_traces[:6]]
+
+    if not raw:
+        # Field extension on trace failure too
+        new_pairs = field_extend(terms)
+        if new_pairs:
+            source = re.sub(r'[^a-z0-9]+', '-', query.lower()).strip('-')[:30]
+            register_pairs(new_pairs, source)
+            return [f"(learned {len(new_pairs)} shapes from the field — ask again)"]
+        return ["CUT"]
+
+    # Compose english
+    english = compose_english(all_traces[:6])
+
+    # Score satisfaction
+    sat = score_satisfaction(query, raw)
+
+    # Register receipt
+    register_receipt(query, raw)
+
+    # Return english if available, raw traces as backup
+    return english if english else raw
 
 if __name__ == '__main__':
     main()
