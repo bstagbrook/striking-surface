@@ -279,7 +279,9 @@ def ask_full(query):
             register_pairs(new_pairs, source)
             files = route(terms)  # retry with new shapes
 
-    if not files: return ["CUT"]
+    if not files:
+        # No route AND no field results — genuinely unknown
+        return ["No registered shapes resonate and the field returned nothing."]
 
     # Strike and trace
     all_traces = []
@@ -293,13 +295,30 @@ def ask_full(query):
     raw = [' → '.join(t) for t in all_traces[:6]]
 
     if not raw:
-        # Field extension on trace failure too
+        # Field extension — learn and answer in the same strike
         new_pairs = field_extend(terms)
         if new_pairs:
             source = re.sub(r'[^a-z0-9]+', '-', query.lower()).strip('-')[:30]
             register_pairs(new_pairs, source)
-            return [f"(learned {len(new_pairs)} shapes from the field — ask again)"]
-        return ["CUT"]
+            # Trace through the new shapes immediately
+            for k, v in new_pairs:
+                chain = [k, v]
+                current = v
+                for _ in range(4):
+                    nxt = None
+                    for pk, pv in new_pairs:
+                        if pk == current:
+                            nxt = pv
+                            break
+                    if not nxt: break
+                    chain.append(nxt)
+                    current = nxt
+                if len(chain) > 2:
+                    all_traces.append(chain)
+            all_traces.sort(key=len, reverse=True)
+            raw = [' → '.join(t) for t in all_traces[:6]]
+
+    if not raw: return ["No registered shapes resonate and the field returned nothing."]
 
     # Compose english
     english = compose_english(all_traces[:6])
