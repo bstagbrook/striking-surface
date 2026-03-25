@@ -1,4 +1,4 @@
-#lang strike
+ #lang strike
 
 ;;; ═══════════════════════════════════════════════════════════════
 ;;; RIVIR — the language continuum
