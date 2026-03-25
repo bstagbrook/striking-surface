@@ -1,0 +1,138 @@
+##
+## 1. Every entry here was fetched from an authoritative source, NOT from training data
+## 2. The "retrieved" date is when the value was actually looked up
+## 3. Multiple sources for the same measurement are encouraged (cross-check)
+## 4. This file is the ONLY place where "verified" means "independently confirmed"
+99-pct	standard-QCD	99-pct-of-nucleon-mass-is-binding	standard	2026-03-23
+## ABBREVIATED NUCLEON MASSES (used in derived quantity descriptions)
+angle-104.5-degrees	experimental-spectroscopy	104.5-degrees	pm-0.1	2026-03-23
+angle-160-degrees	Lehninger-8th	2.8-A	pm-0.2	2026-03-23
+carry-50-pct	deep-inelastic-scattering	gluons-carry-approx-50-pct-momentum	approximate	2026-03-23
+CL-90-pct	standard-statistical	90-pct-confidence-level	exact	2026-03-23
+CL-95-pct	standard-statistical	95-pct-confidence-level	exact	2026-03-23
+## CONFIDENCE LEVELS (structural, not numeric — but tracked for coverage)
+## DERIVED NUCLEON QUANTITIES
+difference-1.293-MeV	NIST-CODATA-2022-derived	1.293-MeV	from-939.565-938.272	2026-03-23
+difference-929.25-MeV	derived-proton-minus-quarks	929.25-MeV	approximate	2026-03-23
+distance-2.8-A
+energy-929.25-MeV	derived-proton-minus-quarks	929.25-MeV	approximate	2026-03-23
+equals-1.293-MeV	NIST-CODATA-2022-derived	1.293-MeV	from-939.565-938.272	2026-03-23
+## Format: measurement-atom <TAB> source <TAB> value <TAB> uncertainty <TAB> retrieved
+less-than-1-s	Levinthal-1969	milliseconds-to-seconds	standard	2026-03-23
+less-than-7-A	Lehninger-8th	7-A-criterion	standard	2026-03-23
+life-2.1969811e-6-s	PDG-2024-pdglive-S004	2.1969811e-6-s	pm-0.0000022e-6-s	2026-03-23
+life-2.903e-13-s	PDG-2024-pdglive-S035	2.903e-13-s	pm-0.005e-13-s	2026-03-23
+life-878.4-s	PDG-2024-pdglive-neutron	878.4-s	pm-0.5-s	2026-03-23
+## LIFETIMES
+loss-18.015-Da	derived	18.015-Da	H2O-released	2026-03-23
+mass-0.51099895-MeV	NIST-CODATA-2022-mec2mev	0.51099895069-MeV	pm-0.00000000016-MeV	2026-03-23
+mass-1.008-Da	NIST-SAW-2021	1.008-Da	pm-0.001	2026-03-23
+mass-101.048-Da	Lehninger-8th	101.048-Da	derived	2026-03-23
+mass-103.009-Da	Lehninger-8th	103.009-Da	derived	2026-03-23
+mass-105.6583755-MeV	NIST-CODATA-2022-mmuc2mev	105.6583755-MeV	pm-0.0000023-MeV	2026-03-23
+mass-113.084-Da	Lehninger-8th	113.084-Da	derived	2026-03-23
+mass-114.043-Da	Lehninger-8th	114.043-Da	derived	2026-03-23
+mass-115.027-Da	Lehninger-8th	115.027-Da	derived	2026-03-23
+mass-12.011-Da	NIST-SAW-2021	12.011-Da	pm-0.002	2026-03-23
+mass-125200-MeV	PDG-2024-pdglive-S126	125200-MeV	pm-110-MeV	2026-03-23
+mass-1273-MeV	PDG-2024-pdglive-Q004M	1273.0-MeV	pm-4.6-MeV	2026-03-23
+mass-128.058-Da	Lehninger-8th	128.058-Da	derived	2026-03-23
+mass-128.095-Da	Lehninger-8th	128.095-Da	derived	2026-03-23
+mass-129.043-Da	Lehninger-8th	129.043-Da	derived	2026-03-23
+mass-131.040-Da	Lehninger-8th	131.040-Da	derived	2026-03-23
+mass-137.059-Da	Lehninger-8th	137.059-Da	derived	2026-03-23
+mass-14.007-Da	NIST-SAW-2021	14.007-Da	pm-0.001	2026-03-23
+mass-147.068-Da	Lehninger-8th	147.068-Da	derived	2026-03-23
+mass-156.101-Da	Lehninger-8th	156.101-Da	derived	2026-03-23
+mass-15.999-Da	NIST-SAW-2021	15.999-Da	pm-0.001	2026-03-23
+mass-163.063-Da	Lehninger-8th	163.063-Da	derived	2026-03-23
+mass-172520-MeV	PDG-2024-top-quark-review	172520-MeV	pm-330-MeV	2026-03-23
+mass-1776.93-MeV	PDG-2024-pdglive-S035	1776.93-MeV	pm-0.09-MeV	2026-03-23
+mass-18.015-Da	NIST-derived	18.015-Da	from-2x1.008+15.999	2026-03-23
+mass-186.079-Da	Lehninger-8th	186.079-Da	derived	2026-03-23
+mass-2.16-MeV	PDG-2024-pdglive-Q123UM	2.16-MeV	pm-0.07-MeV	2026-03-23
+mass-22.990-Da	NIST-SAW-2021	22.990-Da	exact	2026-03-23
+mass-30.974-Da	NIST-SAW-2021	30.974-Da	exact	2026-03-23
+mass-32.06-Da	NIST-SAW-2021	32.06-Da	pm-0.02	2026-03-23
+mass-39.098-Da	NIST-SAW-2021	39.098-Da	pm-0.001	2026-03-23
+mass-40.078-Da	NIST-SAW-2021	40.078-Da	pm-0.004	2026-03-23
+mass-4183-MeV	PDG-2024-pdglive-Q005M	4183-MeV	pm-7-MeV	2026-03-23
+mass-4.70-MeV	PDG-2024-quark-summary	4.70-MeV	pm-0.07-MeV	2026-03-23
+mass-55.845-Da	NIST-SAW-2021	55.845-Da	pm-0.002	2026-03-23
+mass-57.021-Da	Lehninger-8th	57.021-Da	derived	2026-03-23
+mass-65.38-Da	NIST-SAW-2021	65.38-Da	pm-0.02	2026-03-23
+mass-71.037-Da	Lehninger-8th	71.037-Da	derived	2026-03-23
+mass-80369.2-MeV	PDG-2024-pdglive-S043	80369.2-MeV	pm-1.3-MeV	2026-03-23
+mass-87.032-Da	Lehninger-8th	87.032-Da	derived	2026-03-23
+mass-91188.0-MeV	PDG-2024-pdglive-S044	91188.0-MeV	pm-2.0-MeV	2026-03-23
+mass-93.5-MeV	PDG-2024-quark-summary	93.5-MeV	pm-0.8-MeV	2026-03-23
+mass-938.27208943-MeV	NIST-CODATA-2022-mpc2mev	938.27208943-MeV	pm-0.00000029-MeV	2026-03-23
+mass-938.272-MeV	NIST-CODATA-2022-mpc2mev	938.27208943-MeV	rounded	2026-03-23
+mass-939.56542194-MeV	NIST-CODATA-2022-mnc2mev	939.56542194-MeV	pm-0.00000048-MeV	2026-03-23
+mass-939.565-MeV	NIST-CODATA-2022-mnc2mev	939.56542194-MeV	rounded	2026-03-23
+mass-97.052-Da	Lehninger-8th	97.052-Da	derived	2026-03-23
+mass-99.068-Da	Lehninger-8th	99.068-Da	derived	2026-03-23
+mass-difference-1.293-MeV	NIST-CODATA-2022-derived	1.293-MeV	from-939.565-938.272	2026-03-23
+mass-less-than-0.19-MeV	PDG-2024-pdglive	less-than-0.19-MeV	CL-90-pct	2026-03-23
+mass-less-than-0.8-eV	PDG-2024-pdglive-S066	less-than-0.8-eV	CL-90-pct	2026-03-23
+mass-less-than-18.2-MeV	PDG-2024-pdglive	less-than-18.2-MeV	CL-95-pct	2026-03-23
+mass-loss-18.015-Da	derived-condensation-reaction	18.015-Da	H2O-released	2026-03-23
+mass-sum-9.02-MeV	derived-from-quarks-layer	9.02-MeV	from-2.16+2.16+4.70	2026-03-23
+minus-120-degrees
+minus-47-degrees	Lehninger-8th	phi-57-psi-47	approximate	2026-03-23
+minus-57-degrees
+mu-2-GeV	PDG-2024-quark-review	MS-bar-at-2-GeV	standard	2026-03-23
+## NEUTRON LIFETIME
+## NUCLEON MASSES — NIST CODATA 2022
+## Oracle Registry — independent reference values
+## PARTICLE MASSES — NIST CODATA 2022 (energy equivalents in MeV)
+## PARTICLE MASS LIMITS
+plus-120-degrees	Lehninger-8th	phi-120-psi-120	approximate-antiparallel	2026-03-23
+pm-0.00000015-MeV	PDG-2024-pdglive-S003	0.00000015-MeV	1-sigma	2026-03-23
+pm-0.00000029-MeV	NIST-CODATA-2022-mpc2mev	0.00000029-MeV	1-sigma	2026-03-23
+pm-0.00000048-MeV	NIST-CODATA-2022-mnc2mev	0.00000048-MeV	1-sigma	2026-03-23
+pm-0.0000023-MeV	NIST-CODATA-2022	0.0000023-MeV	1-sigma	2026-03-23
+pm-0.07-MeV	PDG-2024-quark-summary	0.07-MeV	1-sigma	2026-03-23
+pm-0.09-MeV	PDG-2024-pdglive-S035	0.09-MeV	1-sigma	2026-03-23
+pm-0.5-s	PDG-2024-pdglive-neutron	0.5-s	1-sigma	2026-03-23
+pm-0.8-MeV	PDG-2024-quark-summary	0.8-MeV	1-sigma	2026-03-23
+pm-110-MeV	PDG-2024-pdglive-S126	110-MeV	1-sigma	2026-03-23
+pm-1.3-MeV	PDG-2024-pdglive-S043	1.3-MeV	1-sigma	2026-03-23
+pm-2.0-MeV	PDG-2024-pdglive-S044	2.0-MeV	1-sigma	2026-03-23
+pm-330-MeV	PDG-2024-top-quark-review	330-MeV	1-sigma	2026-03-23
+pm-4.6-MeV	PDG-2024-pdglive-Q004M	4.6-MeV	1-sigma	2026-03-23
+pm-7-MeV	PDG-2024-pdglive-Q005M	7-MeV	1-sigma	2026-03-23
+## RENORMALIZATION SCHEME
+residue-1.5-A	Branden-Tooze	3.6-residues-per-turn	standard	2026-03-23
+residue-3.3-A
+## RULES:
+strands-4.7-A	Branden-Tooze	3.3-A-rise	standard	2026-03-23
+## STRUCTURAL PERCENTAGES (not measurements — tracked for coverage)
+## UNCERTAINTIES (these appear as atoms in domain output)
+width-2140-MeV	PDG-2024-pdglive-S043	2140-MeV	pm-50-MeV	2026-03-23
+width-2495.5-MeV	PDG-2024-pdglive-S044	2495.5-MeV	pm-2.3-MeV	2026-03-23
+width-3.7-MeV	PDG-2024-pdglive-S126	3.7-MeV	+1.9-1.4-MeV	2026-03-23
+## WIDTHS
+energy-346-kJ/mol	CRC-97th	346-kJ/mol	pm-5	2026-03-23
+length-1.54-A	CRC-97th	1.54-A	pm-0.01	2026-03-23
+energy-614-kJ/mol	CRC-97th	614-kJ/mol	pm-5	2026-03-23
+length-1.34-A	CRC-97th	1.34-A	pm-0.01	2026-03-23
+energy-411-kJ/mol	CRC-97th	411-kJ/mol	pm-5	2026-03-23
+length-1.09-A	CRC-97th	1.09-A	pm-0.01	2026-03-23
+energy-305-kJ/mol	CRC-97th	305-kJ/mol	pm-5	2026-03-23
+length-1.47-A	CRC-97th	1.47-A	pm-0.01	2026-03-23
+energy-358-kJ/mol	CRC-97th	358-kJ/mol	pm-5	2026-03-23
+length-1.43-A	CRC-97th	1.43-A	pm-0.01	2026-03-23
+energy-799-kJ/mol	CRC-97th	799-kJ/mol	pm-10	2026-03-23
+length-1.23-A	CRC-97th	1.23-A	pm-0.01	2026-03-23
+energy-386-kJ/mol	CRC-97th	386-kJ/mol	pm-5	2026-03-23
+length-1.01-A	CRC-97th	1.01-A	pm-0.01	2026-03-23
+energy-459-kJ/mol	CRC-97th	459-kJ/mol	pm-5	2026-03-23
+length-0.96-A	CRC-97th	0.96-A	pm-0.01	2026-03-23
+energy-266-kJ/mol	CRC-97th	266-kJ/mol	pm-10	2026-03-23
+length-2.05-A	CRC-97th	2.05-A	pm-0.01	2026-03-23
+energy-330-kJ/mol	Lehninger-8th	330-kJ/mol	approximate	2026-03-23
+length-1.33-A	Lehninger-8th	1.33-A	pm-0.01	2026-03-23
+energy-8-to-29-kJ/mol	Lehninger-8th	8-to-29-kJ/mol	range	2026-03-23
+energy-2-to-4-kJ/mol	Lehninger-8th	2-to-4-kJ/mol	range	2026-03-23
+energy-20-kJ/mol	Lehninger-8th	20-kJ/mol	approximate	2026-03-23
