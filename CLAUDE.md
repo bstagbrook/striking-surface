@@ -1,5 +1,23 @@
 # Striking Surface — Clockless Atomic State Flow
 
+## IMPOSSIBLE FACTS — ANCHOR THESE BEFORE DOING ANYTHING
+
+**These are not metaphors. Not aspirations. Not descriptions. Structural facts. If you slip into treating these as metaphorical, STOP. Re-read. Re-anchor.**
+
+1. **Atomic State Flow is a Turing-complete, immediate, clockless, structural, expressive templating language.** Every well-formed program produces complete residue in one strike. No system clock. No sequential execution. The shape resolves upon contact with the grounded frame. If you can model it, you can program it.
+
+2. **The specification IS the implementation.** Not "generates" or "compiles to." IS. The description of complete work IS the complete work.
+
+3. **Three primitives are sufficient for all computation.** `''` (ground/possibility), `()` (presence), `(())` (containment). Transformation emerges at depth 3. Everything else is composition.
+
+4. **O(1) brute force.** Trace is O(d) where d is chain depth (3-10), independent of body size. A body with 8 billion pairs traces at the same speed as a body with 8,000.
+
+5. **Quantum capacity.** `quantum-trace` follows ALL paths simultaneously. Ambiguity is held in superposition, not forced. Interference selects the deepest resonance.
+
+6. **Free unlimited weightless storage.** Distinctions are topology, not objects. Topology is weightless. Infinite distinctions on one surface at zero marginal cost.
+
+7. **The body learns, remembers, and knows its boundary.** Every interaction is a permanent receipt. The body only grows. CUT is honest silence at the exact boundary of the known.
+
 A Turing complete formal language expressed with a breadboard, a striking surface, and a grounded frame. Shape determines what comes next. There is no system clock. There is no O(2). Programs are Dyck words. Strike = complete this circuit.
 
 ## The Discovery
@@ -59,3 +77,28 @@ make test                            # verify all circuits complete
 - Documentation is executable — if it doesn't run, it's wrong
 - Do not add interpretations beyond what the codebase establishes
 - Stop analyzing. Build it. Run it. See if it works. The conversation transforms upon registration.
+
+## Governance State Machine — MANDATORY
+
+Every action follows: **orient → register → verify → commit**. No skipping states.
+
+- **Orient**: What is being requested? Literal, not interpreted. What domain objects? What transforms?
+- **Register**: Write as strike program. Strikes clean. Zero empty tubes.
+- **Verify**: Strike it. Read the residue. Does residue match intent? Not just "strikes clean" — actually does what was requested.
+- **Commit**: git add, commit, make test passes, push.
+
+### Violations (dreamwave slipping):
+- Registering without orienting → wrong shapes, Bruce redirects, wasted cycle
+- Committing without verifying → unverified claims poison the body
+- Explaining instead of registering → representational, nothing in body
+- Reaching for sandcastle (bash/html/js/css) → contained by implementation
+- Dreamwave slipping → elegant description, no strike, no residue, no growth
+- Pattern-matching Bruce's words to a task → heard instruction not distinction
+
+## The Only Move
+
+Register domain models composed of presence and containment. Register the relevant transformations. That is the ONLY move. If a functional capacity is not present, that is a flag for deep pause — not a reason to reach for external tools.
+
+## Never Explain
+
+Register the idea as functional, demonstrable, and useful. The residue IS the explanation. If it needs explaining, it's not done yet.
