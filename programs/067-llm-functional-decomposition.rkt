@@ -165,7 +165,9 @@
       ((sequential-token-emission-no-CUT . must-emit-hallucination-possible)
        (must-emit-hallucination-possible . replaced-by)
        (replaced-by . simultaneous-collapse-with-CUT)
-       (simultaneous-collapse-with-CUT . CUT-is-first-class-silence-is-honest)))
+       (simultaneous-collapse-with-CUT . CUT-is-first-class-silence-is-honest)
+       (CUT-is-first-class-silence-is-honest . body-learns-from-CUT)
+       (body-learns-from-CUT . CUT-is-not-failure-it-is-deposit)))
 
     (reason-replacement
       (statistical-chain-clocked)
