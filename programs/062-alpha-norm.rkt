@@ -95,16 +95,18 @@
     ;;; ═══════════════════════════════════════════════════════════
 
     (protein-queries
-      (what-holds-a-protein-together)
+      (protein)
       (hydrogen-bond-donor-and-acceptor)
-      ((what-holds-a-protein-together . hydrogen-bond-donor-and-acceptor)
+      ((protein . protein-structure)
+       (protein-structure . hydrogen-bond-donor-and-acceptor)
        (protein-folding . hydrophobic-core-packing)
-       (protein-structure . alpha-helix)
+       (holds . containment)
+       (together . stabilizes)
+       (stabilizes . hydrophobic-core-packing)
        (alpha-helix . hydrogen-bonds-i-to-i-plus-4)
        (beta-sheet . hydrogen-bonds-between-strands)
-       (how-do-proteins-fold . nonpolar)
-       (what-stabilizes-proteins . hydrophobic-core-packing)
-       (backbone-angles . constrains-backbone)
+       (fold . nonpolar)
+       (backbone . constrains-backbone)
        (ramachandran . phi-psi-angles)))
 
     (amino-acid-queries
