@@ -8800,12 +8800,16 @@ function query(q) {
   const words = q.toLowerCase().replace(/[^a-z]/g, ' ').split(/\s+/).filter(w => w && !STOP.has(w));
   const candidates = [...new Set([...words, ...words.map(stem).filter(s => s)])];
 
-  // Find matching atoms
+  // Find matching atoms — word-boundary matching, not substring
+  // Word must be a complete hyphen-delimited segment of the atom
+  // Minimum 3 characters to prevent noise from "hi" "up" "at" etc
   const matched = new Set();
   const atomList = [...atoms];
   for (const word of candidates) {
+    if (word.length < 3) continue;
+    const re = new RegExp('(^|-)' + word + '(-|$)', 'i');
     for (const atom of atomList) {
-      if (atom.toLowerCase().includes(word) && matched.size < 20) {
+      if (re.test(atom) && matched.size < 15) {
         matched.add(atom);
       }
     }
