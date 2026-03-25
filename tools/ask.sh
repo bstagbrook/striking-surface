@@ -29,7 +29,13 @@ for w in $words; do
 done
 
 # Step 2: Strike the alpha-normalization receipts to find canonical atoms
-NORM_OUTPUT=$(timeout 30 racket programs/062-alpha-norm.rkt 2>/dev/null)
+# Strike both 062 (hand-curated domain queries) and 065 (full English engulfment)
+# Also read raw source pairs — struck output only contains traced chains,
+# but ALL pairs in the source ARE registered normalization receipts.
+NORM_062=$(timeout 30 racket programs/062-alpha-norm.rkt 2>/dev/null)
+NORM_065=$(timeout 30 racket programs/065-english-engulfment.rkt 2>/dev/null)
+RAW_PAIRS=$(grep -hP '\(\S+ \. \S+\)' programs/062-alpha-norm.rkt programs/065-english-engulfment.rkt 2>/dev/null | grep -v ';;;')
+NORM_OUTPUT="$NORM_062 $NORM_065 $RAW_PAIRS"
 
 # Step 3: For each candidate word, find matching atoms in the norm body
 echo ""
@@ -80,19 +86,19 @@ echo "  traces:"
 echo ""
 
 for atom in $matched_atoms; do
-  for f in $(find domain programs -name '*.rkt' ! -name '*.cal.rkt' ! -name '*.def.rkt' ! -name '*TEMPLATE*' ! -name '062-*' 2>/dev/null | sort); do
+  for f in $(find domain programs -name '*.rkt' ! -name '*.cal.rkt' ! -name '*.def.rkt' ! -name '*TEMPLATE*' ! -name '062-*' ! -name '065-*' 2>/dev/null | sort); do
     lang=$(head -1 "$f" 2>/dev/null)
     [ "$lang" != "#lang strike" ] && continue
     out=$(timeout 10 racket "$f" 2>/dev/null) || continue
 
-    # Find trace chains containing this atom
-    chains=$(echo "$out" | grep -oP "\($atom \. [^)]+\)" | head -3 || true)
+    # Find trace chains containing this atom (exact or prefix match)
+    chains=$(echo "$out" | grep -oP "\($atom[a-zA-Z0-9_-]* \. [^)]+\)" | head -3 || true)
     if [ -n "$chains" ]; then
       domain=$(basename "$(dirname "$f")")/$(basename "$f" .rkt)
       while IFS= read -r chain; do
         target=$(echo "$chain" | sed 's/.*\. //;s/)//')
         # Follow the chain one more hop
-        next=$(echo "$out" | grep -oP "\($target \. [^)]+\)" | head -1 || true)
+        next=$(echo "$out" | grep -oP "\($target[a-zA-Z0-9_-]* \. [^)]+\)" | head -1 || true)
         if [ -n "$next" ]; then
           next_target=$(echo "$next" | sed 's/.*\. //;s/)//')
           echo "  [$domain] $atom → $target → $next_target"
@@ -118,7 +124,7 @@ for atom in $matched_atoms; do
     lang=$(head -1 "$f" 2>/dev/null)
     [ "$lang" != "#lang strike" ] && continue
     out=$(timeout 10 racket "$f" 2>/dev/null) || continue
-    chain=$(echo "$out" | grep -oP "\($atom \. [^)]+\)" | head -1 || true)
+    chain=$(echo "$out" | grep -oP "\($atom[a-zA-Z0-9_-]* \. [^)]+\)" | head -1 || true)
     if [ -n "$chain" ]; then
       target=$(echo "$chain" | sed 's/.*\. //;s/)//')
       source_file=$(basename "$(dirname "$f")")/$(basename "$f" .rkt)
