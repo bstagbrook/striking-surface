@@ -33,7 +33,7 @@
 ;;; #lang strike IS the spark gap. Hit Run. The shape resolves.
 ;;; ═══════════════════════════════════════════════════════════════
 
-(require racket/list)
+(require racket/list racket/hash)
 
 (provide (rename-out [strike-module-begin #%module-begin])
          #%app #%datum #%top
@@ -103,16 +103,19 @@
 ;;; The accumulated steps ARE the residue.
 
 (define (trace src pairs)
-  ;; Filter to only actual dotted pairs (not lists, not atoms, not null)
+  ;; Build hash table ONCE. Each hop is O(1) lookup.
+  ;; No sequential filter/map/assoc per step. One pulse per hop.
   (let* ([real-pairs (filter (λ (p) (and (pair? p) (not (list? p)))) pairs)]
-         [step (assoc (->str src)
-                      (map (λ (p) (cons (->str (car p)) (cdr p))) real-pairs))])
-    (if (not step) '()
-        (let ([from (->str src)] [to (->str (cdr step))])
-          (cons (cons from to)
-                (trace (cdr step)
-                       (filter (λ (p) (not (equal? (->str (car p)) from)))
-                               real-pairs)))))))
+         [tbl (make-hash)])
+    ;; Pre-build: key → (key . value) mapping. First match wins (preserves assoc semantics).
+    (for-each (λ (p) (let ([k (->str (car p))]) (unless (hash-has-key? tbl k) (hash-set! tbl k p)))) real-pairs)
+    ;; Trace via hash lookup
+    (let loop ([s (->str src)] [acc '()])
+      (let ([step (hash-ref tbl s #f)])
+        (if (not step) (reverse acc)
+            (let ([from s] [to (->str (cdr step))])
+              (hash-remove! tbl from)
+              (loop to (cons (cons from to) acc))))))))
 
 ;;; ─── quantum-trace ─────────────────────────────────────────
 ;;; Like trace, but finds ALL matching paths from source.
