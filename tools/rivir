@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""RIVIR — body + live internet. One command. Works."""
+
+import subprocess, sys, os, re, json
+
+BODY_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+INDEX = {}  # label → file path
+STOP = set("a an the is are was were be been being have has had do does did will would shall should may might can could what how why when where who which that this these those of in on at to for with by from and or but not no it its i me my you your we our they them their about really very just also some any".split())
+
+def build_index():
+    for root, dirs, files in os.walk(BODY_DIR):
+        for fname in files:
+            if not fname.endswith('.rkt'): continue
+            if '.cal.' in fname or '.def.' in fname or 'TEMPLATE' in fname: continue
+            if fname in ('main.rkt', 'reader.rkt', 'chat.rkt'): continue
+            path = os.path.join(root, fname)
+            try:
+                with open(path) as f:
+                    first = f.readline().strip()
+                    if first != '#lang strike': continue
+                    content = f.read()
+                # Extract labels: (label-name at start of transform
+                labels = re.findall(r'^\s+\(([a-z][-a-z0-9]+)\s*$', content, re.MULTILINE)
+                for label in labels:
+                    if label not in INDEX:
+                        INDEX[label] = []
+                    INDEX[label].append(path)
+            except: pass
+
+def strike(path):
+    try:
+        r = subprocess.run(['racket', path], capture_output=True, text=True, timeout=15, cwd=BODY_DIR)
+        return r.stdout if r.returncode == 0 else ''
+    except: return ''
+
+def extract_pairs(output):
+    return re.findall(r'\(([a-zA-Z0-9/_:.+*-]+) \. ([a-zA-Z0-9/_:.+*-]+)\)', output)
+
+def trace_in_output(output, terms):
+    pairs = extract_pairs(output)
+    fwd = {}
+    for k, v in pairs:
+        if k not in fwd: fwd[k] = v
+
+    # Find atoms matching terms
+    matched = set()
+    for term in terms:
+        pat = re.compile(r'(^|-)' + re.escape(term) + r'(-|$)', re.I)
+        for k, v in pairs:
+            if pat.search(k): matched.add(k)
+            if pat.search(v): matched.add(v)
+
+    # Trace from each matched atom
+    traces = []
+    seen = set()
+    for atom in list(matched)[:10]:
+        chain = [atom]
+        current = atom
+        for _ in range(6):
+            nxt = fwd.get(current)
+            if not nxt: break
+            edge = f"{current}>{nxt}"
+            if edge in seen: break
+            seen.add(edge)
+            chain.append(nxt)
+            current = nxt
+        if len(chain) > 2:
+            traces.append(chain)
+
+    traces.sort(key=len, reverse=True)
+    return traces[:6]
+
+def tokenize(query):
+    words = re.findall(r'[a-z]+', query.lower())
+    terms = [w for w in words if len(w) >= 3 and w not in STOP]
+    stems = []
+    for w in terms:
+        s = re.sub(r'ies$', 'y', w)
+        s = re.sub(r's$', '', s)
+        s = re.sub(r'ing$', '', s)
+        s = re.sub(r'ed$', '', s)
+        if s != w and len(s) >= 3: stems.append(s)
+    return list(set(terms + stems))
+
+def route(terms):
+    """Find files whose labels match query terms."""
+    files = set()
+    for term in terms:
+        for label, paths in INDEX.items():
+            if term in label.split('-'):
+                for p in paths:
+                    files.add(p)
+    return list(files)[:8]
+
+def ask(query):
+    terms = tokenize(query)
+    if not terms: return ["CUT"]
+
+    files = route(terms)
+    if not files: return ["CUT"]
+
+    all_traces = []
+    for f in files:
+        output = strike(f)
+        if output:
+            traces = trace_in_output(output, terms)
+            all_traces.extend(traces)
+
+    all_traces.sort(key=len, reverse=True)
+    return [' → '.join(t) for t in all_traces[:6]] if all_traces else ["CUT"]
+
+def main():
+    build_index()
+    print(f"\n  RIVIR — {len(INDEX)} labels indexed across body")
+    print(f"  speak. ctrl-c to leave.\n")
+
+    while True:
+        try:
+            q = input("  you: ").strip()
+            if not q: continue
+            print()
+            results = ask(q)
+            for r in results:
+                if r == "CUT":
+                    print(f"  CUT")
+                else:
+                    print(f"  {r}")
+            print()
+        except (KeyboardInterrupt, EOFError):
+            print()
+            break
+
+if __name__ == '__main__':
+    main()
